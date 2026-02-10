@@ -165,6 +165,11 @@ const Sidebar = ({ onToggle, activePath = '/' }: SidebarProps) => {
       label: '直播',
       href: '/live',
     },
+    {
+      icon: FolderOpen,
+      label: '私人影库',
+      href: '/private-library',
+    },
   ]);
 
   useEffect(() => {
