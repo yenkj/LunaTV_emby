@@ -198,10 +198,14 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
       )
         return;
 
-      // 筛选出尚未测速的播放源
+      // 筛选出尚未测速的播放源，并排除不需要测速的源（openlist/emby/xiaoya）
       const pendingSources = availableSources.filter((source) => {
         const sourceKey = `${source.source}-${source.id}`;
-        return !attemptedSourcesRef.current.has(sourceKey);
+        // 跳过已测速的源
+        if (attemptedSourcesRef.current.has(sourceKey)) return false;
+        // 跳过不需要测速的源
+        if (source.source === 'openlist' || source.source === 'emby' || source.source.startsWith('emby_') || source.source === 'xiaoya') return false;
+        return true;
       });
 
       if (pendingSources.length === 0) return;
