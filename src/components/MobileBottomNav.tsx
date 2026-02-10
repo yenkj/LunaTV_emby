@@ -109,6 +109,14 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
       activeTextColor: 'text-white',
       hoverBg: 'hover:bg-red-500/20',
     },
+     {
+      icon: FolderOpen,
+      label: '影库',
+      href: '/private-library',
+      activeGradient: 'bg-gradient-to-r from-blue-500 to-pink-500',
+      activeTextColor: 'text-white',
+      hoverBg: 'hover:bg-blue-500/20',
+    },
   ]);
 
   // 动态添加自定义分类
