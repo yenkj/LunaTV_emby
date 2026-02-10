@@ -96,6 +96,40 @@ export interface AdminConfig {
     enableWebSearch?: boolean;           // 是否启用联网搜索
     tavilyApiKeys?: string[];            // Tavily API Keys（支持多个轮询，1000次/月免费）
   };
+  EmbyConfig?: {
+    // 新格式：多源配置（推荐）
+    Sources?: Array<{
+      key: string; // 唯一标识，如 'emby1', 'emby2'
+      name: string; // 显示名称，如 '家庭Emby', '公司Emby'
+      enabled: boolean; // 是否启用
+      ServerURL: string; // Emby服务器地址
+      ApiKey?: string; // API Key（推荐方式）
+      Username?: string; // 用户名（或使用API Key）
+      Password?: string; // 密码
+      UserId?: string; // 用户ID（登录后获取）
+      AuthToken?: string; // 认证令牌（用户名密码登录后获取）
+      Libraries?: string[]; // 要显示的媒体库ID（可选，默认全部）
+      LastSyncTime?: number; // 最后同步时间戳
+      ItemCount?: number; // 媒体项数量
+      isDefault?: boolean; // 是否为默认源（用于向后兼容）
+      // 高级流媒体选项
+      removeEmbyPrefix?: boolean; // 播放链接移除/emby前缀
+      appendMediaSourceId?: boolean; // 拼接MediaSourceId参数
+      transcodeMp4?: boolean; // 转码mp4
+      proxyPlay?: boolean; // 视频播放代理开关
+    }>;
+    // 旧格式：单源配置（向后兼容）
+    Enabled?: boolean;
+    ServerURL?: string;
+    ApiKey?: string;
+    Username?: string;
+    Password?: string;
+    UserId?: string;
+    AuthToken?: string;
+    Libraries?: string[];
+    LastSyncTime?: number;
+    ItemCount?: number;
+  };
   YouTubeConfig?: {
     enabled: boolean;                    // 是否启用YouTube搜索功能
     apiKey: string;                      // YouTube Data API v3密钥
