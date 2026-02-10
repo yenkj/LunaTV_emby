@@ -466,7 +466,43 @@ export async function configSelfCheck(adminConfig: AdminConfig): Promise<AdminCo
       maxTokens: 3000                                  // 默认最大token数
     };
   }
+  // Emby配置迁移：将旧格式迁移到新格式
+  if (adminConfig.EmbyConfig) {
+    // 如果是旧格式（有ServerURL但没有Sources）
+    if (adminConfig.EmbyConfig.ServerURL && !adminConfig.EmbyConfig.Sources) {
+      console.log('[Config] 检测到旧格式Emby配置，自动迁移到新格式');
+      const oldConfig = adminConfig.EmbyConfig;
+      adminConfig.EmbyConfig = {
+        Sources: [{
+          key: 'default',
+          name: 'Emby',
+          enabled: oldConfig.Enabled ?? false,
+          ServerURL: oldConfig.ServerURL || '',
+          ApiKey: oldConfig.ApiKey,
+          Username: oldConfig.Username,
+          Password: oldConfig.Password,
+          UserId: oldConfig.UserId,
+          AuthToken: oldConfig.AuthToken,
+          Libraries: oldConfig.Libraries,
+          LastSyncTime: oldConfig.LastSyncTime,
+          ItemCount: oldConfig.ItemCount,
+          isDefault: true,
+        }],
+      };
+    }
 
+    // Emby源去重
+    if (adminConfig.EmbyConfig?.Sources) {
+      const seenEmbyKeys = new Set<string>();
+      adminConfig.EmbyConfig.Sources = adminConfig.EmbyConfig.Sources.filter((source) => {
+        if (seenEmbyKeys.has(source.key)) {
+          return false;
+        }
+        seenEmbyKeys.add(source.key);
+        return true;
+      });
+    }
+  }
   // 确保YouTube配置有默认值
   if (!adminConfig.YouTubeConfig) {
     adminConfig.YouTubeConfig = {
