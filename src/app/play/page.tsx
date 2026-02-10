@@ -271,7 +271,22 @@ function PlayPageClient() {
 
   // 短剧ID（用于获取详情显示，不影响源搜索）
   const [shortdramaId] = useState(searchParams.get('shortdrama_id') || '');
+  
+  // 当前源和ID - source 直接存储完整格式（如 'emby_wumei' 或 'emby'）
+  const [currentSource, setCurrentSource] = useState(searchParams.get('source') || '');
+  const [currentId, setCurrentId] = useState(searchParams.get('id') || '');
+  const [fileName] = useState(searchParams.get('fileName') || ''); // 小雅源：用户点击的文件名
+  const isDirectPlay = currentSource === 'directplay';
 
+  // 解析 source 参数以获取 embyKey（仅用于 API 调用）
+  const parseSourceForApi = (source: string): { source: string; embyKey?: string } => {
+    if (source.startsWith('emby_')) {
+      const key = source.substring(5);
+      return { source: 'emby', embyKey: key };
+    }
+    return { source };
+  };
+  
   // 搜索所需信息
   const [searchTitle] = useState(searchParams.get('stitle') || '');
   const [searchType] = useState(searchParams.get('stype') || '');
@@ -1675,6 +1690,10 @@ function PlayPageClient() {
       !detailData.episodes ||
       episodeIndex >= detailData.episodes.length
     ) {
+      // openlist 和 emby 源的剧集是懒加载的，如果 episodes 为空则跳过
+      if ((detailData?.source === 'openlist' || detailData?.source === 'emby') && (!detailData.episodes || detailData.episodes.length === 0)) {
+        return;
+      }
       setVideoUrl('');
       return;
     }
