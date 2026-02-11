@@ -438,6 +438,93 @@ function PlayPageClient() {
     `;
   }, [currentEpisodeIndex, detail, portalContainer]);
 
+  // 监听 detail 和 currentEpisodeIndex 变化，动态更新字幕
+  useEffect(() => {
+    if (!artPlayerRef.current || !detail) return;
+
+    const currentSubtitles = detail.subtitles?.[currentEpisodeIndex] || [];
+    const savedSubtitleSize = typeof window !== 'undefined' ? localStorage.getItem('subtitleSize') || '2em' : '2em';
+
+    if (currentSubtitles.length > 0) {
+      artPlayerRef.current.subtitle.switch(currentSubtitles[0].url, {
+        type: 'vtt',
+        style: {
+          color: '#fff',
+          fontSize: savedSubtitleSize,
+          bottom: '60px',
+        },
+        encoding: 'utf-8',
+      });
+
+      try {
+        artPlayerRef.current.setting.remove('subtitle-selector');
+      } catch (e) {
+        // 忽略错误，可能设置项不存在
+      }
+
+      const subtitleOptions = [
+        { html: '关闭', url: '' },
+        ...currentSubtitles.map((sub: any) => ({
+          html: sub.label,
+          url: sub.url,
+        })),
+      ];
+
+      artPlayerRef.current.setting.add({
+        name: 'subtitle-selector',
+        html: '字幕',
+        selector: subtitleOptions,
+        onSelect: function (item: any) {
+          if (artPlayerRef.current) {
+            if (item.url === '') {
+              artPlayerRef.current.subtitle.show = false;
+            } else {
+              artPlayerRef.current.subtitle.switch(item.url, {
+                name: item.html,
+              });
+              artPlayerRef.current.subtitle.show = true;
+            }
+          }
+        },
+      });
+
+      try {
+        artPlayerRef.current.setting.remove('subtitle-size-selector');
+      } catch (e) {
+        // 忽略错误，可能设置项不存在
+      }
+
+      const defaultOption = savedSubtitleSize === '1em' ? '小' : savedSubtitleSize === '3em' ? '大' : savedSubtitleSize === '4em' ? '超大' : '中';
+      artPlayerRef.current.setting.add({
+        name: 'subtitle-size-selector',
+        html: '字幕大小',
+        selector: [
+          { html: '小', size: '1em' },
+          { html: '中', size: '2em' },
+          { html: '大', size: '3em' },
+          { html: '超大', size: '4em' },
+        ],
+        onSelect: function (item: any) {
+          if (artPlayerRef.current) {
+            artPlayerRef.current.subtitle.style({
+              fontSize: item.size,
+            });
+            localStorage.setItem('subtitleSize', item.size);
+          }
+        },
+        default: defaultOption,
+      });
+    } else {
+      artPlayerRef.current.subtitle.show = false;
+      try {
+        artPlayerRef.current.setting.remove('subtitle-selector');
+        artPlayerRef.current.setting.remove('subtitle-size-selector');
+      } catch (e) {
+        // 忽略错误，可能设置项不存在
+      }
+    }
+  }, [detail, currentEpisodeIndex, artPlayerRef.current]);
+
   // 获取自定义去广告代码
   useEffect(() => {
     const fetchAdFilterCode = async () => {
