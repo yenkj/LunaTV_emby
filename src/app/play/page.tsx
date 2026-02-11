@@ -451,7 +451,7 @@ function PlayPageClient() {
         style: {
           color: '#fff',
           fontSize: savedSubtitleSize,
-          bottom: '80px',
+          bottom: '10%',
         },
         encoding: 'utf-8',
       });
