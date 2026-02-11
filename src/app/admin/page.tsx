@@ -7217,7 +7217,6 @@ function AdminPageClient() {
     </PageLayout>
   );
 }
-};
 
 const EmbyConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | null; refreshConfig: () => Promise<void> }) => {
   const { alertModal, showAlert, hideAlert } = useAlertModal();
@@ -8045,15 +8044,7 @@ const EmbyConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
   );
 };
 
-onClose = { hideAlert }
-type = { alertModal.type }
-title = { alertModal.title }
-message = { alertModal.message }
-timer = { alertModal.timer }
-showConfirm = { alertModal.showConfirm }
-  />
-
-  {/* 重置配置确认弹窗 */ }
+{/* 重置配置确认弹窗 */ }
 {
   showResetConfigModal && createPortal(
     <div className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4' onClick={() => setShowResetConfigModal(false)}>
@@ -8110,9 +8101,6 @@ showConfirm = { alertModal.showConfirm }
     </div>,
     document.body
   )
-}
-    </PageLayout >
-  );
 }
 
 export default function AdminPage() {
