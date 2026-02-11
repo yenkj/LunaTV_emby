@@ -30,7 +30,7 @@ async function getEmbyClient(embyKey?: string) {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string; filename: string } }
+  context: { params: Promise<{ token: string; filename: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url);
