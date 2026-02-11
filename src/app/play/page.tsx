@@ -85,6 +85,7 @@ function PlayPageClient() {
   const [loadingMessage, setLoadingMessage] = useState('正在搜索播放源...');
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
+  const [selectedSubtitleUrl, setSelectedSubtitleUrl] = useState<string | null>(null);
 
   // 测速进度状态
   const [speedTestProgress, setSpeedTestProgress] = useState<{
@@ -446,8 +447,12 @@ function PlayPageClient() {
     const savedSubtitleSize = typeof window !== 'undefined' ? localStorage.getItem('subtitleSize') || '2em' : '2em';
 
     if (currentSubtitles.length > 0) {
-      artPlayerRef.current.subtitle.switch(currentSubtitles[0].url, {
+      const subtitleUrlToUse = selectedSubtitleUrl || currentSubtitles[0].url;
+      const subtitleLabel = currentSubtitles.find((sub: any) => sub.url === subtitleUrlToUse)?.label || currentSubtitles[0].label;
+
+      artPlayerRef.current.subtitle.switch(subtitleUrlToUse, {
         type: 'vtt',
+        name: subtitleLabel,
         style: {
           color: '#fff',
           fontSize: savedSubtitleSize,
@@ -478,11 +483,13 @@ function PlayPageClient() {
           if (artPlayerRef.current) {
             if (item.url === '') {
               artPlayerRef.current.subtitle.show = false;
+              setSelectedSubtitleUrl(null);
             } else {
               artPlayerRef.current.subtitle.switch(item.url, {
                 name: item.html,
               });
               artPlayerRef.current.subtitle.show = true;
+              setSelectedSubtitleUrl(item.url);
             }
           }
         },
@@ -523,7 +530,7 @@ function PlayPageClient() {
         // 忽略错误，可能设置项不存在
       }
     }
-  }, [detail, currentEpisodeIndex, artPlayerRef.current]);
+  }, [detail, currentEpisodeIndex, artPlayerRef.current, selectedSubtitleUrl]);
 
   // 获取自定义去广告代码
   useEffect(() => {
