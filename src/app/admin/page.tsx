@@ -7214,6 +7214,7 @@ function AdminPageClient() {
             </CollapsibleTab>
           </div>
         </div>
+      </div>
     </PageLayout>
   );
 }
