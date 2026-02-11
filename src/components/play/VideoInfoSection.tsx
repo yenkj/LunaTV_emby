@@ -1,9 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState, useCallback } from 'react';
 import FavoriteButton from '@/components/play/FavoriteButton';
 import VideoCard from '@/components/VideoCard';
 import CommentSection from '@/components/play/CommentSection';
+
+interface TMDBRecommendation {
+  tmdbId: number;
+  title: string;
+  poster: string;
+  rating: string;
+  mediaType: 'movie' | 'tv';
+}
 
 interface VideoInfoSectionProps {
   videoTitle: string;
@@ -37,6 +45,107 @@ function VideoInfoSection(props: VideoInfoSectionProps) {
     loadingMovieDetails, loadingBangumiDetails, loadingComments, loadingCelebrityWorks,
     selectedCelebrityName, celebrityWorks, onCelebrityClick, onClearCelebrity, processImageUrl
   } = props;
+
+  const [tmdbRecommendations, setTmdbRecommendations] = useState<TMDBRecommendation[]>([]);
+  const [loadingTmdbRecommendations, setLoadingTmdbRecommendations] = useState(false);
+  const [tmdbError, setTmdbError] = useState<string | null>(null);
+
+  const fetchTMDBRecommendations = useCallback(async () => {
+    if (!videoTitle) return;
+
+    try {
+      console.log('正在获取TMDB推荐');
+      setLoadingTmdbRecommendations(true);
+      setTmdbError(null);
+
+      const mappingCacheKey = `tmdb_title_mapping_${videoTitle}`;
+      const mappingCache = localStorage.getItem(mappingCacheKey);
+      let cachedId: string | null = null;
+
+      if (mappingCache) {
+        try {
+          const { tmdbId, timestamp } = JSON.parse(mappingCache);
+          const cacheAge = Date.now() - timestamp;
+          const cacheMaxAge = 30 * 24 * 60 * 60 * 1000;
+
+          if (cacheAge < cacheMaxAge && tmdbId) {
+            console.log('使用缓存的TMDB ID映射');
+            cachedId = tmdbId;
+
+            const recommendationsCacheKey = `tmdb_recommendations_${tmdbId}`;
+            const recommendationsCache = localStorage.getItem(recommendationsCacheKey);
+
+            if (recommendationsCache) {
+              try {
+                const { data, timestamp: recTimestamp } = JSON.parse(recommendationsCache);
+                const recCacheAge = Date.now() - recTimestamp;
+                const recCacheMaxAge = 24 * 60 * 60 * 1000;
+
+                if (recCacheAge < recCacheMaxAge && data) {
+                  console.log('使用缓存的TMDB推荐数据');
+                  setTmdbRecommendations(data);
+                  setLoadingTmdbRecommendations(false);
+                  return;
+                }
+              } catch (e) {
+                console.error('解析推荐缓存失败:', e);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('解析映射缓存失败:', e);
+        }
+      }
+
+      const url = cachedId
+        ? `/api/tmdb-recommendations?cachedId=${encodeURIComponent(cachedId)}`
+        : `/api/tmdb-recommendations?title=${encodeURIComponent(videoTitle)}`;
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('获取TMDB推荐失败');
+      }
+
+      const result = await response.json();
+      const recommendationsData = result.recommendations || [];
+      setTmdbRecommendations(recommendationsData);
+
+      if (result.tmdbId) {
+        try {
+          localStorage.setItem(
+            mappingCacheKey,
+            JSON.stringify({
+              tmdbId: result.tmdbId,
+              timestamp: Date.now(),
+            })
+          );
+
+          const recommendationsCacheKey = `tmdb_recommendations_${result.tmdbId}`;
+          localStorage.setItem(
+            recommendationsCacheKey,
+            JSON.stringify({
+              data: recommendationsData,
+              timestamp: Date.now(),
+            })
+          );
+        } catch (e) {
+          console.error('保存缓存失败:', e);
+        }
+      }
+    } catch (err) {
+      console.error('获取TMDB推荐失败:', err);
+      setTmdbError(err instanceof Error ? err.message : '获取推荐失败');
+    } finally {
+      setLoadingTmdbRecommendations(false);
+    }
+  }, [videoTitle]);
+
+  useEffect(() => {
+    if (currentSource === 'emby' || currentSource?.startsWith('emby_')) {
+      fetchTMDBRecommendations();
+    }
+  }, [currentSource, fetchTMDBRecommendations]);
 
   return (
     <div className='md:col-span-3'>
@@ -606,6 +715,106 @@ function VideoInfoSection(props: VideoInfoSectionProps) {
                       );
                     })}
                   </div>
+                </div>
+              )}
+
+              {/* TMDB 推荐影片 - 仅针对 emby 源 */}
+              {(currentSource === 'emby' || currentSource?.startsWith('emby_')) && (
+                <div className='mt-6 border-t border-gray-200 dark:border-gray-700 pt-6'>
+                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2'>
+                    <span>💡</span>
+                    <span>喜欢这部{tmdbRecommendations.length > 0 && tmdbRecommendations[0].mediaType === 'tv' ? '剧' : '电影'}的人也喜欢</span>
+                  </h3>
+                  {loadingTmdbRecommendations ? (
+                    <div className='flex justify-center items-center py-8'>
+                      <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-green-500'></div>
+                    </div>
+                  ) : tmdbError ? (
+                    <div className='text-center py-8 text-gray-500 dark:text-gray-400'>
+                      {tmdbError}
+                    </div>
+                  ) : tmdbRecommendations.length > 0 ? (
+                    <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
+                      {tmdbRecommendations.map((item) => {
+                        const playUrl = `/play?title=${encodeURIComponent(item.title)}&prefer=true`;
+                        return (
+                          <div
+                            key={item.tmdbId}
+                            ref={(node) => {
+                              if (node) {
+                                const oldClick = (node as any)._clickHandler;
+                                const oldTouchStart = (node as any)._touchStartHandler;
+                                const oldTouchEnd = (node as any)._touchEndHandler;
+                                if (oldClick) node.removeEventListener('click', oldClick, true);
+                                if (oldTouchStart) node.removeEventListener('touchstart', oldTouchStart, true);
+                                if (oldTouchEnd) node.removeEventListener('touchend', oldTouchEnd, true);
+
+                                let touchStartTime = 0;
+                                let isLongPress = false;
+                                let longPressTimer: NodeJS.Timeout | null = null;
+
+                                const touchStartHandler = (e: Event) => {
+                                  touchStartTime = Date.now();
+                                  isLongPress = false;
+
+                                  longPressTimer = setTimeout(() => {
+                                    isLongPress = true;
+                                  }, 500);
+                                };
+
+                                const touchEndHandler = (e: Event) => {
+                                  if (longPressTimer) {
+                                    clearTimeout(longPressTimer);
+                                    longPressTimer = null;
+                                  }
+
+                                  const touchDuration = Date.now() - touchStartTime;
+
+                                  if (isLongPress || touchDuration >= 500) {
+                                    return;
+                                  }
+
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  e.stopImmediatePropagation();
+                                  window.location.href = playUrl;
+                                };
+
+                                const clickHandler = (e: Event) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  e.stopImmediatePropagation();
+                                  window.location.href = playUrl;
+                                };
+
+                                node.addEventListener('touchstart', touchStartHandler, true);
+                                node.addEventListener('touchend', touchEndHandler, true);
+                                node.addEventListener('click', clickHandler, true);
+
+                                (node as any)._touchStartHandler = touchStartHandler;
+                                (node as any)._touchEndHandler = touchEndHandler;
+                                (node as any)._clickHandler = clickHandler;
+                              }
+                            }}
+                            style={{
+                              WebkitTapHighlightColor: 'transparent',
+                              touchAction: 'manipulation'
+                            }}
+                          >
+                            <VideoCard
+                              id={item.tmdbId.toString()}
+                              title={item.title}
+                              poster={item.poster}
+                              rate={item.rating}
+                              tmdb_id={item.tmdbId}
+                              from='tmdb'
+                              isAggregate={true}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
                 </div>
               )}
 
