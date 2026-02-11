@@ -2772,8 +2772,6 @@ function PlayPageClient() {
           detailData = detailSources[0];
         }
       }
-
-      detailData = await preferBestSource(sourcesInfo);
     }
 
     console.log(detailData.source, detailData.id);
