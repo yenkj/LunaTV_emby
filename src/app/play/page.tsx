@@ -2511,6 +2511,9 @@ function PlayPageClient() {
                   : true;
 
                 return titleMatch && yearMatch && typeMatch;
+				if (item.source === 'emby' || item.source?.startsWith('emby_') || item.source === 'openlist') {
+                return item.type_name === '电影' ? 'movie' : 'tv';
+                }
               }
             );
 
@@ -2715,6 +2718,15 @@ function PlayPageClient() {
         );
         if (target) {
           detailData = target;
+          // 如果是 openlist 或 emby 源且 episodes 为空，需要调用 detail 接口获取完整信息
+          if ((detailData.source === 'openlist' || detailData.source === 'emby' || detailData.source.startsWith('emby_')) && (!detailData.episodes || detailData.episodes.length === 0)) {
+            console.log('[Play] OpenList/Emby source has no episodes, fetching detail...');
+            // currentSource 已经是完整格式
+            const detailSources = await fetchSourceDetail(currentSource, currentId, searchTitle || videoTitle);
+            if (detailSources.length > 0) {
+              detailData = detailSources[0];
+            }
+          }
         } else {
           setError('未找到匹配结果');
           setLoading(false);
@@ -2729,6 +2741,48 @@ function PlayPageClient() {
       ) {
         setLoadingStage('preferring');
         setLoadingMessage('⚡ 正在优选最佳播放源...');
+		
+        // 过滤掉 openlist、所有 emby 源和 xiaoya 源，它们不参与测速
+        const sourcesToTest = sourcesInfo.filter(s => {
+          // 检查是否为 openlist
+          if (s.source === 'openlist') return false;
+
+          // 检查是否为 emby 源（包括 emby 和 emby_xxx 格式）
+          if (s.source === 'emby' || s.source.startsWith('emby_')) return false;
+
+          // 检查是否为 xiaoya 源
+          if (s.source === 'xiaoya') return false;
+
+          return true;
+        });
+
+        const excludedSources = sourcesInfo.filter(s =>
+          s.source === 'openlist' ||
+          s.source === 'emby' ||
+          s.source.startsWith('emby_') ||
+          s.source === 'xiaoya'
+        );
+
+        if (sourcesToTest.length > 0) {
+          detailData = await preferBestSource(sourcesToTest);
+        } else if (excludedSources.length > 0) {
+          // 如果只有 openlist/emby/xiaoya 源，直接使用第一个
+          detailData = excludedSources[0];
+        } else {
+          detailData = sourcesInfo[0];
+        }
+      }
+
+      console.log(detailData.source, detailData.id);
+
+      // 如果是 openlist 或 emby 源且 episodes 为空，需要调用 detail 接口获取完整信息
+      if ((detailData.source === 'openlist' || detailData.source === 'emby') && (!detailData.episodes || detailData.episodes.length === 0)) {
+        console.log('[Play] OpenList/Emby source has no episodes after selection, fetching detail...');
+        const detailSources = await fetchSourceDetail(detailData.source, detailData.id, detailData.title || videoTitleRef.current);
+        if (detailSources.length > 0) {
+          detailData = detailSources[0];
+        }
+      }
 
         detailData = await preferBestSource(sourcesInfo);
       }
@@ -2903,6 +2957,27 @@ function PlayPageClient() {
       if (!newDetail) {
         setError('未找到匹配结果');
         return;
+      }
+
+      // 如果是 openlist 或 emby 源且 episodes 为空，需要调用 detail 接口获取完整信息
+      if ((newDetail.source === 'openlist' || newDetail.source === 'emby' || newDetail.source.startsWith('emby_')) && (!newDetail.episodes || newDetail.episodes.length === 0)) {
+        try {
+          const detailResponse = await fetch(`/api/source-detail?source=${newSource}&id=${newId}&title=${encodeURIComponent(newTitle)}`);
+          if (detailResponse.ok) {
+            const detailData = await detailResponse.json();
+            if (!detailData) {
+              throw new Error('获取的详情数据为空');
+            }
+            newDetail = detailData;
+          } else {
+            throw new Error('获取 openlist 详情失败');
+          }
+        } catch (err) {
+          console.error('获取 openlist 详情失败:', err);
+          setIsVideoLoading(false);
+          setError('获取视频详情失败，请重试');
+          return;
+        }
       }
 
       // 🔥 换源时保持当前集数不变（除非新源集数不够）
@@ -3537,7 +3612,12 @@ function PlayPageClient() {
       ) {
         return;
       }
-
+	  
+    // openlist 和 emby 源的剧集是懒加载的，如果 episodes 为空则跳过检查
+    if ((currentSource === 'openlist' || currentSource === 'emby' || detail?.source === 'openlist' || detail?.source === 'emby') && (!detail || !detail.episodes || detail.episodes.length === 0)) {
+      return;
+    }
+	
     // 确保选集索引有效
     if (
       !detail ||
