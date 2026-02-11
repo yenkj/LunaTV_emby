@@ -30,7 +30,8 @@ export async function GET(
   }
 
   // 验证 TVBox Token
-  const requestToken = params.token;
+  const actualParams = await params;
+  const requestToken = actualParams.token;
   const subscribeToken = process.env.TVBOX_SUBSCRIBE_TOKEN;
 
   if (!subscribeToken || requestToken !== subscribeToken) {
