@@ -96,6 +96,13 @@ export default function ModernNav({ showAIButton = false, onAIButtonClick }: Mod
       color: 'text-teal-500',
       gradient: 'from-teal-500 to-cyan-500',
     },
+    {
+      icon: Film,
+      label: 'Emby',
+      href: '/private-library',
+      color: 'text-indigo-500',
+      gradient: 'from-indigo-500 to-purple-600',
+    },
   ]);
 
   useEffect(() => {
