@@ -55,8 +55,6 @@ export async function GET(request: NextRequest) {
 
     const config = await getConfig();
     const tmdbApiKey = config.SiteConfig.TMDBApiKey;
-    const tmdbProxy = config.SiteConfig.TMDBProxy;
-    const tmdbReverseProxy = config.SiteConfig.TMDBReverseProxy;
 
     if (!tmdbApiKey) {
       return NextResponse.json(
@@ -81,7 +79,7 @@ export async function GET(request: NextRequest) {
         tmdbId = cached.data.tmdbId;
         mediaType = cached.data.mediaType;
       } else {
-        const searchResult = await searchTMDBMulti(tmdbApiKey, cleanedTitle, tmdbProxy, tmdbReverseProxy);
+        const searchResult = await searchTMDBMulti(tmdbApiKey, cleanedTitle);
 
         if (searchResult.code !== 200 || !searchResult.results.length) {
           return NextResponse.json(
@@ -131,8 +129,8 @@ export async function GET(request: NextRequest) {
 
     const recommendationsResult =
       mediaType === 'movie'
-        ? await getTMDBMovieRecommendations(tmdbApiKey, tmdbId, tmdbProxy, tmdbReverseProxy)
-        : await getTMDBTVRecommendations(tmdbApiKey, tmdbId, tmdbProxy, tmdbReverseProxy);
+        ? await getTMDBMovieRecommendations(tmdbApiKey, tmdbId)
+        : await getTMDBTVRecommendations(tmdbApiKey, tmdbId);
 
     if (recommendationsResult.code !== 200) {
       return NextResponse.json(
