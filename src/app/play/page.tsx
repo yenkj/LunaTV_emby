@@ -512,6 +512,7 @@ function PlayPageClient() {
             });
             localStorage.setItem('subtitleSize', item.size);
           }
+          return item.html;
         },
         default: defaultOption,
       });
