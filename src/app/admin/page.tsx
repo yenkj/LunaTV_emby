@@ -7057,231 +7057,233 @@ function AdminPageClient() {
   }
 
   return (
-    <PageLayout activePath='/admin'>
-      <div className='-mt-6 md:mt-0'>
-        <div className='max-w-[95%] mx-auto pb-40 md:pb-safe-bottom'>
-          {/* 标题 + 重置配置按钮 */}
-          <div className='flex items-center gap-2 mb-8'>
-            <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
-              管理员设置
-            </h1>
-            {config && role === 'owner' && (
-              <button
-                onClick={handleResetConfig}
-                className={`px-3 py-1 text-xs rounded-md transition-colors ${buttonStyles.dangerSmall}`}
-              >
-                重置配置
-              </button>
-            )}
-          </div>
+    <>
+      <PageLayout activePath='/admin'>
+        <div className='-mt-6 md:mt-0'>
+          <div className='max-w-[95%] mx-auto pb-40 md:pb-safe-bottom'>
+            {/* 标题 + 重置配置按钮 */}
+            <div className='flex items-center gap-2 mb-8'>
+              <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
+                管理员设置
+              </h1>
+              {config && role === 'owner' && (
+                <button
+                  onClick={handleResetConfig}
+                  className={`px-3 py-1 text-xs rounded-md transition-colors ${buttonStyles.dangerSmall}`}
+                >
+                  重置配置
+                </button>
+              )}
+            </div>
 
-          {/* 所有配置标签容器 */}
-          <div className='space-y-6'>
-            {/* 配置文件标签 - 仅站长可见 */}
-            {role === 'owner' && (
+            {/* 所有配置标签容器 */}
+            <div className='space-y-6'>
+              {/* 配置文件标签 - 仅站长可见 */}
+              {role === 'owner' && (
+                <CollapsibleTab
+                  title='配置文件'
+                  icon={
+                    <FileText
+                      size={20}
+                      className='text-gray-600 dark:text-gray-400'
+                    />
+                  }
+                  isExpanded={expandedTabs.configFile}
+                  onToggle={() => toggleTab('configFile')}
+                >
+                  <ConfigFileComponent config={config} refreshConfig={fetchConfig} />
+                </CollapsibleTab>
+              )}
+
+              {/* 站点配置标签 */}
               <CollapsibleTab
-                title='配置文件'
+                title='站点配置'
                 icon={
-                  <FileText
+                  <Settings
                     size={20}
                     className='text-gray-600 dark:text-gray-400'
                   />
                 }
-                isExpanded={expandedTabs.configFile}
-                onToggle={() => toggleTab('configFile')}
+                isExpanded={expandedTabs.siteConfig}
+                onToggle={() => toggleTab('siteConfig')}
               >
-                <ConfigFileComponent config={config} refreshConfig={fetchConfig} />
+                <SiteConfigComponent config={config} refreshConfig={fetchConfig} />
               </CollapsibleTab>
-            )}
 
-            {/* 站点配置标签 */}
-            <CollapsibleTab
-              title='站点配置'
-              icon={
-                <Settings
-                  size={20}
-                  className='text-gray-600 dark:text-gray-400'
+              {/* 用户配置标签 */}
+              <CollapsibleTab
+                title='用户配置'
+                icon={
+                  <Users size={20} className='text-gray-600 dark:text-gray-400' />
+                }
+                isExpanded={expandedTabs.userConfig}
+                onToggle={() => toggleTab('userConfig')}
+              >
+                <UserConfig
+                  config={config}
+                  role={role}
+                  refreshConfig={fetchConfig}
                 />
-              }
-              isExpanded={expandedTabs.siteConfig}
-              onToggle={() => toggleTab('siteConfig')}
-            >
-              <SiteConfigComponent config={config} refreshConfig={fetchConfig} />
-            </CollapsibleTab>
+              </CollapsibleTab>
 
-            {/* 用户配置标签 */}
-            <CollapsibleTab
-              title='用户配置'
-              icon={
-                <Users size={20} className='text-gray-600 dark:text-gray-400' />
-              }
-              isExpanded={expandedTabs.userConfig}
-              onToggle={() => toggleTab('userConfig')}
-            >
-              <UserConfig
-                config={config}
-                role={role}
-                refreshConfig={fetchConfig}
-              />
-            </CollapsibleTab>
+              {/* 视频源配置标签 */}
+              <CollapsibleTab
+                title='视频源配置'
+                icon={
+                  <Video size={20} className='text-gray-600 dark:text-gray-400' />
+                }
+                isExpanded={expandedTabs.videoSource}
+                onToggle={() => toggleTab('videoSource')}
+              >
+                <VideoSourceConfig config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
 
-            {/* 视频源配置标签 */}
-            <CollapsibleTab
-              title='视频源配置'
-              icon={
-                <Video size={20} className='text-gray-600 dark:text-gray-400' />
-              }
-              isExpanded={expandedTabs.videoSource}
-              onToggle={() => toggleTab('videoSource')}
-            >
-              <VideoSourceConfig config={config} refreshConfig={fetchConfig} />
-            </CollapsibleTab>
+              {/* 源检测标签 */}
+              <CollapsibleTab
+                title='源检测'
+                icon={
+                  <TestTube size={20} className='text-gray-600 dark:text-gray-400' />
+                }
+                isExpanded={expandedTabs.sourceTest}
+                onToggle={() => toggleTab('sourceTest')}
+              >
+                <SourceTestModule />
+              </CollapsibleTab>
 
-            {/* 源检测标签 */}
-            <CollapsibleTab
-              title='源检测'
-              icon={
-                <TestTube size={20} className='text-gray-600 dark:text-gray-400' />
-              }
-              isExpanded={expandedTabs.sourceTest}
-              onToggle={() => toggleTab('sourceTest')}
-            >
-              <SourceTestModule />
-            </CollapsibleTab>
+              {/* 直播源配置标签 */}
+              <CollapsibleTab
+                title='直播源配置'
+                icon={
+                  <Tv size={20} className='text-gray-600 dark:text-gray-400' />
+                }
+                isExpanded={expandedTabs.liveSource}
+                onToggle={() => toggleTab('liveSource')}
+              >
+                <LiveSourceConfig config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
 
-            {/* 直播源配置标签 */}
-            <CollapsibleTab
-              title='直播源配置'
-              icon={
-                <Tv size={20} className='text-gray-600 dark:text-gray-400' />
-              }
-              isExpanded={expandedTabs.liveSource}
-              onToggle={() => toggleTab('liveSource')}
-            >
-              <LiveSourceConfig config={config} refreshConfig={fetchConfig} />
-            </CollapsibleTab>
+              {/* 分类配置标签 */}
+              <CollapsibleTab
+                title='分类配置'
+                icon={
+                  <FolderOpen
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.categoryConfig}
+                onToggle={() => toggleTab('categoryConfig')}
+              >
+                <CategoryConfig config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
 
-            {/* 分类配置标签 */}
-            <CollapsibleTab
-              title='分类配置'
-              icon={
-                <FolderOpen
-                  size={20}
-                  className='text-gray-600 dark:text-gray-400'
-                />
-              }
-              isExpanded={expandedTabs.categoryConfig}
-              onToggle={() => toggleTab('categoryConfig')}
-            >
-              <CategoryConfig config={config} refreshConfig={fetchConfig} />
-            </CollapsibleTab>
+              {/* 网盘搜索配置标签 */}
+              <CollapsibleTab
+                title='网盘搜索配置'
+                icon={
+                  <Database
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.netdiskConfig}
+                onToggle={() => toggleTab('netdiskConfig')}
+              >
+                <NetDiskConfig config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
 
-            {/* 网盘搜索配置标签 */}
-            <CollapsibleTab
-              title='网盘搜索配置'
-              icon={
-                <Database
-                  size={20}
-                  className='text-gray-600 dark:text-gray-400'
-                />
-              }
-              isExpanded={expandedTabs.netdiskConfig}
-              onToggle={() => toggleTab('netdiskConfig')}
-            >
-              <NetDiskConfig config={config} refreshConfig={fetchConfig} />
-            </CollapsibleTab>
+              {/* Emby媒体库配置标签 */}
+              <CollapsibleTab
+                title='Emby媒体库配置'
+                icon={
+                  <Video
+                    size={20}
+                    className='text-green-600 dark:text-green-400'
+                  />
+                }
+                isExpanded={expandedTabs.embyConfig}
+                onToggle={() => toggleTab('embyConfig')}
+              >
+                <EmbyConfigComponent config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
 
-            {/* Emby媒体库配置标签 */}
-            <CollapsibleTab
-              title='Emby媒体库配置'
-              icon={
-                <Video
-                  size={20}
-                  className='text-green-600 dark:text-green-400'
-                />
-              }
-              isExpanded={expandedTabs.embyConfig}
-              onToggle={() => toggleTab('embyConfig')}
-            >
-              <EmbyConfigComponent config={config} refreshConfig={fetchConfig} />
-            </CollapsibleTab>
-
-            {/* AI推荐配置标签 */}
-            <CollapsibleTab
-              title='AI推荐配置'
-              icon={
-                <Brain
-                  size={20}
-                  className='text-gray-600 dark:text-gray-400'
-                />
-              }
-              isExpanded={expandedTabs.aiRecommendConfig}
-              onToggle={() => toggleTab('aiRecommendConfig')}
-            >
-              <AIRecommendConfig config={config} refreshConfig={fetchConfig} />
-            </CollapsibleTab>
+              {/* AI推荐配置标签 */}
+              <CollapsibleTab
+                title='AI推荐配置'
+                icon={
+                  <Brain
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.aiRecommendConfig}
+                onToggle={() => toggleTab('aiRecommendConfig')}
+              >
+                <AIRecommendConfig config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
+            </div>
           </div>
         </div>
-      </div>
-    </PageLayout>
+      </PageLayout>
 
-    {/* 重置配置确认弹窗 */ }
-  {showResetConfigModal && createPortal(
-      <div className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4' onClick={() => setShowResetConfigModal(false)}>
-        <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full' onClick={(e) => e.stopPropagation()}>
-          <div className='p-6'>
-            <div className='flex items-center justify-between mb-6'>
-              <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
-                确认重置配置
-              </h3>
-              <button
-                onClick={() => setShowResetConfigModal(false)}
-                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors'
-              >
-                <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
-                </svg>
-              </button>
-            </div>
-
-            <div className='mb-6'>
-              <div className='bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4'>
-                <div className='flex items-center space-x-2 mb-2'>
-                  <svg className='w-5 h-5 text-yellow-600 dark:text-yellow-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
-                  </svg>
-                  <span className='text-sm font-medium text-yellow-800 dark:text-yellow-300'>
-                    ⚠️ 危险操作警告
-                  </span>
+      {/* 重置配置确认弹窗 */}
+      {
+        showResetConfigModal && createPortal(
+          <div className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4' onClick={() => setShowResetConfigModal(false)}>
+            <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full' onClick={(e) => e.stopPropagation()}>
+              <div className='p-6'>
+                <div className='flex items-center justify-between mb-6'>
+                  <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
+                    确认重置配置
+                  </h3>
+                  <button
+                    onClick={() => setShowResetConfigModal(false)}
+                    className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors'
+                  >
+                    <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                    </svg>
+                  </button>
                 </div>
-                <p className='text-sm text-yellow-700 dark:text-yellow-400'>
-                  此操作将重置用户封禁和管理员设置、自定义视频源，站点配置将重置为默认值，是否继续？
-                </p>
+
+                <div className='mb-6'>
+                  <div className='bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4'>
+                    <div className='flex items-center space-x-2 mb-2'>
+                      <svg className='w-5 h-5 text-yellow-600 dark:text-yellow-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                      </svg>
+                      <span className='text-sm font-medium text-yellow-800 dark:text-yellow-300'>
+                        ⚠️ 危险操作警告
+                      </span>
+                    </div>
+                    <p className='text-sm text-yellow-700 dark:text-yellow-400'>
+                      此操作将重置用户封禁和管理员设置、自定义视频源，站点配置将重置为默认值，是否继续？
+                    </p>
+                  </div>
+                </div>
+
+                {/* 操作按钮 */}
+                <div className='flex justify-end space-x-3'>
+                  <button
+                    onClick={() => setShowResetConfigModal(false)}
+                    className={`px-6 py-2.5 text-sm font-medium ${buttonStyles.secondary}`}
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={handleConfirmResetConfig}
+                    disabled={isLoading('resetConfig')}
+                    className={`px-6 py-2.5 text-sm font-medium ${buttonStyles.danger}`}
+                  >
+                    {isLoading('resetConfig') ? '重置中...' : '确认重置'}
+                  </button>
+                </div>
               </div>
             </div>
-
-            {/* 操作按钮 */}
-            <div className='flex justify-end space-x-3'>
-              <button
-                onClick={() => setShowResetConfigModal(false)}
-                className={`px-6 py-2.5 text-sm font-medium ${buttonStyles.secondary}`}
-              >
-                取消
-              </button>
-              <button
-                onClick={handleConfirmResetConfig}
-                disabled={isLoading('resetConfig')}
-                className={`px-6 py-2.5 text-sm font-medium ${buttonStyles.danger}`}
-              >
-                {isLoading('resetConfig') ? '重置中...' : '确认重置'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>,
-      document.body
-    )
-  }
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
 
