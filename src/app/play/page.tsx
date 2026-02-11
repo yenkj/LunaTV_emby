@@ -273,8 +273,6 @@ function PlayPageClient() {
   const [shortdramaId] = useState(searchParams.get('shortdrama_id') || '');
 
   // 当前源和ID - source 直接存储完整格式（如 'emby_wumei' 或 'emby'）
-  const [currentSource, setCurrentSource] = useState(searchParams.get('source') || '');
-  const [currentId, setCurrentId] = useState(searchParams.get('id') || '');
   const [fileName] = useState(searchParams.get('fileName') || ''); // 小雅源：用户点击的文件名
   const isDirectPlay = currentSource === 'directplay';
 
@@ -2938,7 +2936,7 @@ const handleSourceChange = async (
       }
     }
 
-    const newDetail = availableSources.find(
+    let newDetail = availableSources.find(
       (source) => source.source === newSource && source.id === newId
     );
     if (!newDetail) {
