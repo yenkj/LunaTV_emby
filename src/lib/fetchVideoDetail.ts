@@ -12,7 +12,7 @@ interface FetchVideoDetailOptions {
 
 /**
  * 根据 source 与 id 获取视频详情。
- * 1. 如果是特殊源（emby、openlist、xiaoya），直接调用对应的获取函数。
+ * 1. 如果是特殊源（emby），直接调用对应的获取函数。
  * 2. 若传入 fallbackTitle，则先调用 /api/search 搜索精确匹配。
  * 3. 若搜索未命中或未提供 fallbackTitle，则直接调用 /api/detail。
  */
@@ -21,7 +21,7 @@ export async function fetchVideoDetail({
   id,
   fallbackTitle = '',
 }: FetchVideoDetailOptions): Promise<SearchResult> {
-  // 检查是否是特殊源（emby、openlist、xiaoya）
+  // 检查是否是特殊源（emby）
   if (isSpecialSource(source)) {
     const detail = await getSpecialSourceDetail(source, id);
     if (detail) {

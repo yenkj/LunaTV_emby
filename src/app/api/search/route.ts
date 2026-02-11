@@ -75,13 +75,6 @@ export async function GET(request: NextRequest) {
 
   // 优化：预计算搜索变体，智能生成（普通查询1个，需要变体的2个）
   const searchVariants = generateSearchVariants(query);
-  // 检查是否配置了 OpenList
-  const hasOpenList = !!(
-    config.OpenListConfig?.Enabled &&
-    config.OpenListConfig?.URL &&
-    config.OpenListConfig?.Username &&
-    config.OpenListConfig?.Password
-  );
 
   // 获取所有启用的 Emby 源
   const { embyManager } = await import('@/lib/emby-manager');
@@ -134,64 +127,6 @@ export async function GET(request: NextRequest) {
       return [];
     })
   );
-
-  // 搜索 OpenList（如果配置了）- 异步带超时
-  const openlistPromise = hasOpenList
-    ? Promise.race([
-        (async () => {
-          try {
-            const { getCachedMetaInfo, setCachedMetaInfo } = await import('@/lib/openlist-cache');
-            const { getTMDBImageUrl } = await import('@/lib/tmdb.search');
-            const { db } = await import('@/lib/db');
-
-            let metaInfo = getCachedMetaInfo();
-
-            if (!metaInfo) {
-              const metainfoJson = await db.getGlobalValue('video.metainfo');
-              if (metainfoJson) {
-                metaInfo = JSON.parse(metainfoJson);
-                if (metaInfo) {
-                  setCachedMetaInfo(metaInfo);
-                }
-              }
-            }
-
-            if (metaInfo && metaInfo.folders) {
-              return Object.entries(metaInfo.folders)
-                .filter(([folderName, info]: [string, any]) => {
-                  const matchFolder = folderName.toLowerCase().includes(query.toLowerCase());
-                  const matchTitle = info.title.toLowerCase().includes(query.toLowerCase());
-                  return matchFolder || matchTitle;
-                })
-                .map(([folderName, info]: [string, any]) => ({
-                  id: folderName,
-                  source: 'openlist',
-                  source_name: '私人影库',
-                  title: info.title,
-                  poster: getTMDBImageUrl(info.poster_path),
-                  episodes: [],
-                  episodes_titles: [],
-                  year: info.release_date.split('-')[0] || '',
-                  desc: info.overview,
-                  type_name: info.media_type === 'movie' ? '电影' : '电视剧',
-                  douban_id: 0,
-                }));
-            }
-            return [];
-          } catch (error) {
-            console.error('[Search] 搜索 OpenList 失败:', error);
-            return [];
-          }
-        })(),
-        new Promise<any[]>((_, reject) =>
-          setTimeout(() => reject(new Error('OpenList timeout')), 20000)
-        ),
-      ]).catch((error) => {
-        console.error('[Search] 搜索 OpenList 超时:', error);
-        return [];
-      })
-    : Promise.resolve([]);
-  
   // 添加超时控制和错误处理，避免慢接口拖累整体响应
   const searchPromises = apiSites.map((site) =>
     Promise.race([

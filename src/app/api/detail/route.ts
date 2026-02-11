@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthInfoFromCookie } from '@/lib/auth';
-import { getAvailableApiSites, getCacheTime } from '@/lib/config';
+import { getAvailableApiSites, getCacheTime, getConfig } from '@/lib/config';
 import { getDetailFromApi } from '@/lib/downstream';
 import { recordRequest, getDbQueryCount, resetDbQueryCount } from '@/lib/performance-monitor';
 
@@ -76,102 +76,102 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-  // 特殊处理 emby 源（支持多源）
-  if (sourceCode === 'emby' || sourceCode.startsWith('emby_')) {
-    try {
-      const config = await getConfig();
+    // 特殊处理 emby 源（支持多源）
+    if (sourceCode === 'emby' || sourceCode.startsWith('emby_')) {
+      try {
+        const config = await getConfig();
 
-      // 检查是否有启用的 Emby 源
-      if (!config.EmbyConfig?.Sources || config.EmbyConfig.Sources.length === 0) {
-        throw new Error('Emby 未配置或未启用');
-      }
-
-      // 解析 embyKey
-      let embyKey: string | undefined;
-      if (sourceCode.startsWith('emby_')) {
-        embyKey = sourceCode.substring(5); // 'emby_'.length = 5
-      }
-
-      // 使用 EmbyManager 获取客户端和配置
-      const { embyManager } = await import('@/lib/emby-manager');
-      const sources = await embyManager.getEnabledSources();
-      const sourceConfig = sources.find(s => s.key === embyKey);
-      const sourceName = sourceConfig?.name || 'Emby';
-
-      const client = await embyManager.getClient(embyKey);
-
-      // 获取媒体详情
-      const item = await client.getItem(id);
-
-      // 根据类型处理
-      if (item.Type === 'Movie') {
-        // 电影
-        const subtitles = client.getSubtitles(item);
-
-        const result = {
-          source: sourceCode, // 保持与请求一致（emby 或 emby_key）
-          source_name: sourceName,
-          id: item.Id,
-          title: item.Name,
-          poster: client.getImageUrl(item.Id, 'Primary'),
-          year: item.ProductionYear?.toString() || '',
-          douban_id: 0,
-          desc: item.Overview || '',
-          episodes: [await client.getStreamUrl(item.Id)],
-          episodes_titles: [item.Name],
-          subtitles: subtitles.length > 0 ? [subtitles] : [],
-          proxyMode: false,
-        };
-
-        return NextResponse.json(result);
-      } else if (item.Type === 'Series') {
-        // 剧集 - 获取所有季和集
-        const seasons = await client.getSeasons(item.Id);
-        const allEpisodes: any[] = [];
-
-        for (const season of seasons) {
-          const episodes = await client.getEpisodes(item.Id, season.Id);
-          allEpisodes.push(...episodes);
+        // 检查是否有启用的 Emby 源
+        if (!config.EmbyConfig?.Sources || config.EmbyConfig.Sources.length === 0) {
+          throw new Error('Emby 未配置或未启用');
         }
 
-        // 按季和集排序
-        allEpisodes.sort((a, b) => {
-          if (a.ParentIndexNumber !== b.ParentIndexNumber) {
-            return (a.ParentIndexNumber || 0) - (b.ParentIndexNumber || 0);
+        // 解析 embyKey
+        let embyKey: string | undefined;
+        if (sourceCode.startsWith('emby_')) {
+          embyKey = sourceCode.substring(5); // 'emby_'.length = 5
+        }
+
+        // 使用 EmbyManager 获取客户端和配置
+        const { embyManager } = await import('@/lib/emby-manager');
+        const sources = await embyManager.getEnabledSources();
+        const sourceConfig = sources.find(s => s.key === embyKey);
+        const sourceName = sourceConfig?.name || 'Emby';
+
+        const client = await embyManager.getClient(embyKey);
+
+        // 获取媒体详情
+        const item = await client.getItem(id);
+
+        // 根据类型处理
+        if (item.Type === 'Movie') {
+          // 电影
+          const subtitles = client.getSubtitles(item);
+
+          const result = {
+            source: sourceCode, // 保持与请求一致（emby 或 emby_key）
+            source_name: sourceName,
+            id: item.Id,
+            title: item.Name,
+            poster: client.getImageUrl(item.Id, 'Primary'),
+            year: item.ProductionYear?.toString() || '',
+            douban_id: 0,
+            desc: item.Overview || '',
+            episodes: [await client.getStreamUrl(item.Id)],
+            episodes_titles: [item.Name],
+            subtitles: subtitles.length > 0 ? [subtitles] : [],
+            proxyMode: false,
+          };
+
+          return NextResponse.json(result);
+        } else if (item.Type === 'Series') {
+          // 剧集 - 获取所有季和集
+          const seasons = await client.getSeasons(item.Id);
+          const allEpisodes: any[] = [];
+
+          for (const season of seasons) {
+            const episodes = await client.getEpisodes(item.Id, season.Id);
+            allEpisodes.push(...episodes);
           }
-          return (a.IndexNumber || 0) - (b.IndexNumber || 0);
-        });
 
-        const result = {
-          source: sourceCode, // 保持与请求一致（emby 或 emby_key）
-          source_name: sourceName,
-          id: item.Id,
-          title: item.Name,
-          poster: client.getImageUrl(item.Id, 'Primary'),
-          year: item.ProductionYear?.toString() || '',
-          douban_id: 0,
-          desc: item.Overview || '',
-          episodes: await Promise.all(allEpisodes.map((ep) => client.getStreamUrl(ep.Id))),
-          episodes_titles: allEpisodes.map((ep) => {
-            const seasonNum = ep.ParentIndexNumber || 1;
-            const episodeNum = ep.IndexNumber || 1;
-            return `S${seasonNum.toString().padStart(2, '0')}E${episodeNum.toString().padStart(2, '0')}`;
-          }),
-          subtitles: allEpisodes.map((ep) => client.getSubtitles(ep)),
-          proxyMode: false,
-        };
+          // 按季和集排序
+          allEpisodes.sort((a, b) => {
+            if (a.ParentIndexNumber !== b.ParentIndexNumber) {
+              return (a.ParentIndexNumber || 0) - (b.ParentIndexNumber || 0);
+            }
+            return (a.IndexNumber || 0) - (b.IndexNumber || 0);
+          });
 
-        return NextResponse.json(result);
-      } else {
-        throw new Error('不支持的媒体类型');
+          const result = {
+            source: sourceCode, // 保持与请求一致（emby 或 emby_key）
+            source_name: sourceName,
+            id: item.Id,
+            title: item.Name,
+            poster: client.getImageUrl(item.Id, 'Primary'),
+            year: item.ProductionYear?.toString() || '',
+            douban_id: 0,
+            desc: item.Overview || '',
+            episodes: await Promise.all(allEpisodes.map((ep) => client.getStreamUrl(ep.Id))),
+            episodes_titles: allEpisodes.map((ep) => {
+              const seasonNum = ep.ParentIndexNumber || 1;
+              const episodeNum = ep.IndexNumber || 1;
+              return `S${seasonNum.toString().padStart(2, '0')}E${episodeNum.toString().padStart(2, '0')}`;
+            }),
+            subtitles: allEpisodes.map((ep) => client.getSubtitles(ep)),
+            proxyMode: false,
+          };
+
+          return NextResponse.json(result);
+        } else {
+          throw new Error('不支持的媒体类型');
+        }
+      } catch (error) {
+        return NextResponse.json(
+          { error: (error as Error).message },
+          { status: 500 }
+        );
       }
-    } catch (error) {
-      return NextResponse.json(
-        { error: (error as Error).message },
-        { status: 500 }
-      );
     }
-  }
     const apiSites = await getAvailableApiSites(authInfo.username);
     const apiSite = apiSites.find((site) => site.key === sourceCode);
 

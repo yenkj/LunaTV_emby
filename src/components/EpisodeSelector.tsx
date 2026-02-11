@@ -198,13 +198,13 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
       )
         return;
 
-      // 筛选出尚未测速的播放源，并排除不需要测速的源（openlist/emby/xiaoya）
+      // 筛选出尚未测速的播放源，并排除不需要测速的源（emby）
       const pendingSources = availableSources.filter((source) => {
         const sourceKey = `${source.source}-${source.id}`;
         // 跳过已测速的源
         if (attemptedSourcesRef.current.has(sourceKey)) return false;
         // 跳过不需要测速的源
-        if (source.source === 'openlist' || source.source === 'emby' || source.source.startsWith('emby_') || source.source === 'xiaoya') return false;
+        if (source.source === 'emby' || source.source.startsWith('emby_')) return false;
         return true;
       });
 
@@ -661,11 +661,10 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
 
                           {/* 源名称和集数信息 - 垂直居中 */}
                           <div className='flex items-center justify-between'>
-                            <span className={`text-xs px-2 py-1 border rounded text-gray-700 dark:text-gray-300 ${
-                              source.source === 'xiaoya' ? 'border-blue-500' : source.source === 'openlist' || source.source === 'emby' || source.source?.startsWith('emby_')
-                           ? 'border-yellow-500'
-                                : 'border-gray-500/60'
-                      }`}>
+                            <span className={`text-xs px-2 py-1 border rounded text-gray-700 dark:text-gray-300 ${source.source === 'emby' || source.source?.startsWith('emby_')
+                              ? 'border-yellow-500'
+                              : 'border-gray-500/60'
+                              }`}>
                               {source.source_name}
                             </span>
                             {source.episodes.length > 1 && (

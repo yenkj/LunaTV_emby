@@ -314,17 +314,13 @@ function SearchPageClient() {
       { label: '全部来源', value: 'all' },
       ...Array.from(sourcesSet.entries())
         .sort((a, b) => {
-          // 判断是否为 openlist
-          const aIsOpenList = a[0] === 'openlist';
-          const bIsOpenList = b[0] === 'openlist';
-
           // 判断是否为 emby 源（包括 emby 和 emby_xxx 格式）
           const aIsEmby = a[0] === 'emby' || a[0].startsWith('emby_');
           const bIsEmby = b[0] === 'emby' || b[0].startsWith('emby_');
 
-          // 优先级：OpenList(100) > Emby(90) > 其他(0)
-          const aPriority = aIsOpenList ? 100 : aIsEmby ? 90 : 0;
-          const bPriority = bIsOpenList ? 100 : bIsEmby ? 90 : 0;
+          // 优先级：Emby(90) > 其他(0)
+          const aPriority = aIsEmby ? 90 : 0;
+          const bPriority = bIsEmby ? 90 : 0;
 
           if (aPriority !== bPriority) {
             return bPriority - aPriority; // 降序排列
