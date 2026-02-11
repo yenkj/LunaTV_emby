@@ -272,6 +272,7 @@ function PlayPageClient() {
   // 短剧ID（用于获取详情显示，不影响源搜索）
   const [shortdramaId] = useState(searchParams.get('shortdrama_id') || '');
 
+  // 当前源和ID - source 直接存储完整格式（如 'emby_wumei' 或 'emby'）
   const [fileName] = useState(searchParams.get('fileName') || ''); // 小雅源：用户点击的文件名
   const isDirectPlay = currentSource === 'directplay';
 
