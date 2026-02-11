@@ -120,7 +120,6 @@ interface AlertModalProps {
   message?: string;
   timer?: number;
   showConfirm?: boolean;
-  onConfirm?: () => void;
 }
 
 const AlertModal = ({
@@ -130,8 +129,7 @@ const AlertModal = ({
   title,
   message,
   timer,
-  showConfirm = false,
-  onConfirm
+  showConfirm = false
 }: AlertModalProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -196,12 +194,7 @@ const AlertModal = ({
 
           {showConfirm && (
             <button
-              onClick={() => {
-                if (onConfirm) {
-                  onConfirm();
-                }
-                onClose();
-              }}
+              onClick={onClose}
               className={`px-4 py-2 text-sm font-medium ${buttonStyles.primary}`}
             >
               确定
@@ -223,7 +216,6 @@ const useAlertModal = () => {
     message?: string;
     timer?: number;
     showConfirm?: boolean;
-    onConfirm?: () => void;
   }>({
     isOpen: false,
     type: 'success',
@@ -891,8 +883,9 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
               <div className='flex items-center'>
                 <button
                   type="button"
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${config.UserConfig.AllowRegister ? buttonStyles.toggleOn : buttonStyles.toggleOff
-                    }`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                    config.UserConfig.AllowRegister ? buttonStyles.toggleOn : buttonStyles.toggleOff
+                  }`}
                   role="switch"
                   aria-checked={config.UserConfig.AllowRegister}
                   onClick={async () => {
@@ -909,7 +902,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                             }
                           })
                         });
-
+                        
                         if (response.ok) {
                           await refreshConfig();
                           showAlert({
@@ -929,8 +922,9 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                 >
                   <span
                     aria-hidden="true"
-                    className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${config.UserConfig.AllowRegister ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
-                      }`}
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${
+                      config.UserConfig.AllowRegister ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
+                    }`}
                   />
                 </button>
                 <span className='ml-3 text-sm font-medium text-gray-900 dark:text-gray-100'>
@@ -953,8 +947,9 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                 <div className='flex items-center'>
                   <button
                     type="button"
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleOn : buttonStyles.toggleOff
-                      }`}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                      config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleOn : buttonStyles.toggleOff
+                    }`}
                     role="switch"
                     aria-checked={config.UserConfig.AutoCleanupInactiveUsers}
                     onClick={async () => {
@@ -995,8 +990,9 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                   >
                     <span
                       aria-hidden="true"
-                      className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
-                        }`}
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${
+                        config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
+                      }`}
                     />
                   </button>
                   <span className='ml-3 text-sm font-medium text-gray-900 dark:text-gray-100'>
@@ -3390,7 +3386,7 @@ const VideoSourceConfig = ({
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${source.is_adult
               ? 'bg-linear-to-r from-red-600 to-pink-600 focus:ring-red-500'
               : 'bg-gray-200 dark:bg-gray-700 focus:ring-gray-500'
-              } ${isLoading(`toggleAdult_${source.key}`) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            } ${isLoading(`toggleAdult_${source.key}`) ? 'opacity-50 cursor-not-allowed' : ''}`}
             title={source.is_adult ? '点击取消成人资源标记' : '点击标记为成人资源'}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${source.is_adult ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -3833,20 +3829,22 @@ const VideoSourceConfig = ({
           <button
             onClick={handleCheckProxyStatus}
             disabled={!videoProxySettings.enabled || isLoading('checkProxyStatus')}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!videoProxySettings.enabled || isLoading('checkProxyStatus')
-              ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500'
-              : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              !videoProxySettings.enabled || isLoading('checkProxyStatus')
+                ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
           >
             {isLoading('checkProxyStatus') ? '检测中...' : '🔍 检测代理状态'}
           </button>
           <button
             onClick={handleSaveVideoProxy}
             disabled={isLoading('saveVideoProxy')}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isLoading('saveVideoProxy')
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              isLoading('saveVideoProxy')
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
           >
             {isLoading('saveVideoProxy') ? '保存中...' : '保存代理配置'}
           </button>
@@ -3854,10 +3852,11 @@ const VideoSourceConfig = ({
 
         {/* 代理状态显示 */}
         {proxyStatus && (
-          <div className={`mt-3 p-3 rounded-lg border ${proxyStatus.healthy
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-            }`}>
+          <div className={`mt-3 p-3 rounded-lg border ${
+            proxyStatus.healthy
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+          }`}>
             <div className='flex items-center gap-2'>
               {proxyStatus.healthy ? (
                 <svg className='w-5 h-5 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -3869,8 +3868,9 @@ const VideoSourceConfig = ({
                 </svg>
               )}
               <div className='flex-1'>
-                <div className={`text-sm font-semibold ${proxyStatus.healthy ? 'text-green-900 dark:text-green-300' : 'text-red-900 dark:text-red-300'
-                  }`}>
+                <div className={`text-sm font-semibold ${
+                  proxyStatus.healthy ? 'text-green-900 dark:text-green-300' : 'text-red-900 dark:text-red-300'
+                }`}>
                   {proxyStatus.healthy ? '✅ 代理正常工作' : '❌ 代理连接失败'}
                 </div>
                 <div className='text-xs text-gray-600 dark:text-gray-400 mt-1'>
@@ -3991,10 +3991,11 @@ const VideoSourceConfig = ({
             <button
               onClick={() => setShowValidationModal(true)}
               disabled={isValidating}
-              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 ${isValidating
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-br from-purple-600 via-indigo-500 to-purple-500 hover:from-purple-700 hover:via-indigo-600 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 backdrop-blur-sm border border-white/10'
-                } transition-all duration-300`}
+              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 ${
+                isValidating
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-br from-purple-600 via-indigo-500 to-purple-500 hover:from-purple-700 hover:via-indigo-600 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 backdrop-blur-sm border border-white/10'
+              } transition-all duration-300`}
             >
               {isValidating ? (
                 <>
@@ -4038,10 +4039,11 @@ const VideoSourceConfig = ({
             )}
             <button
               onClick={() => setShowAddForm(!showAddForm)}
-              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 transition-all duration-300 backdrop-blur-sm border border-white/10 ${showAddForm
-                ? 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-500 hover:from-gray-600 hover:via-gray-700 hover:to-gray-600 text-white shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-600/40'
-                : 'bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 hover:from-emerald-700 hover:via-green-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-green-500/40'
-                } hover:-translate-y-0.5 active:scale-95`}
+              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 transition-all duration-300 backdrop-blur-sm border border-white/10 ${
+                showAddForm
+                  ? 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-500 hover:from-gray-600 hover:via-gray-700 hover:to-gray-600 text-white shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-600/40'
+                  : 'bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 hover:from-emerald-700 hover:via-green-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-green-500/40'
+              } hover:-translate-y-0.5 active:scale-95`}
             >
               {showAddForm ? (
                 <>
@@ -5606,14 +5608,16 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                   enableAutoRefresh: !prev.enableAutoRefresh,
                 }))
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${cronSettings.enableAutoRefresh
-                ? 'bg-green-600'
-                : 'bg-gray-300 dark:bg-gray-600'
-                }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                cronSettings.enableAutoRefresh
+                  ? 'bg-green-600'
+                  : 'bg-gray-300 dark:bg-gray-600'
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${cronSettings.enableAutoRefresh ? 'translate-x-6' : 'translate-x-1'
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                  cronSettings.enableAutoRefresh ? 'translate-x-6' : 'translate-x-1'
+                }`}
               />
             </button>
           </label>
@@ -5657,14 +5661,16 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                   onlyRefreshRecent: !prev.onlyRefreshRecent,
                 }))
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${cronSettings.onlyRefreshRecent
-                ? 'bg-green-600'
-                : 'bg-gray-300 dark:bg-gray-600'
-                }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                cronSettings.onlyRefreshRecent
+                  ? 'bg-green-600'
+                  : 'bg-gray-300 dark:bg-gray-600'
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${cronSettings.onlyRefreshRecent ? 'translate-x-6' : 'translate-x-1'
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                  cronSettings.onlyRefreshRecent ? 'translate-x-6' : 'translate-x-1'
+                }`}
               />
             </button>
           </label>
@@ -5710,14 +5716,16 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                   onlyRefreshOngoing: !prev.onlyRefreshOngoing,
                 }))
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${cronSettings.onlyRefreshOngoing
-                ? 'bg-green-600'
-                : 'bg-gray-300 dark:bg-gray-600'
-                }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                cronSettings.onlyRefreshOngoing
+                  ? 'bg-green-600'
+                  : 'bg-gray-300 dark:bg-gray-600'
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${cronSettings.onlyRefreshOngoing ? 'translate-x-6' : 'translate-x-1'
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                  cronSettings.onlyRefreshOngoing ? 'translate-x-6' : 'translate-x-1'
+                }`}
               />
             </button>
           </label>
@@ -5930,14 +5938,16 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                 EnableTMDBActorSearch: !prev.EnableTMDBActorSearch,
               }))
             }
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${siteSettings.EnableTMDBActorSearch
-              ? 'bg-green-600'
-              : 'bg-gray-200 dark:bg-gray-700'
-              }`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              siteSettings.EnableTMDBActorSearch
+                ? 'bg-green-600'
+                : 'bg-gray-200 dark:bg-gray-700'
+            }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${siteSettings.EnableTMDBActorSearch ? 'translate-x-6' : 'translate-x-1'
-                }`}
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                siteSettings.EnableTMDBActorSearch ? 'translate-x-6' : 'translate-x-1'
+              }`}
             />
           </button>
         </div>
@@ -6329,53 +6339,53 @@ const LiveSourceConfig = ({
       <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3'>
         {corsStats.totalChecked > 0 ? (
           <>
-            <div className='flex items-center justify-between'>
-              <h4 className='text-sm font-semibold text-blue-900 dark:text-blue-100'>
-                📊 直连模式统计
-              </h4>
-              <button
-                onClick={handleClearCorsCache}
-                className='text-xs px-3 py-1.5 bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-200 rounded-lg transition-colors font-medium'
-              >
-                清除缓存
-              </button>
-            </div>
+          <div className='flex items-center justify-between'>
+            <h4 className='text-sm font-semibold text-blue-900 dark:text-blue-100'>
+              📊 直连模式统计
+            </h4>
+            <button
+              onClick={handleClearCorsCache}
+              className='text-xs px-3 py-1.5 bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-200 rounded-lg transition-colors font-medium'
+            >
+              清除缓存
+            </button>
+          </div>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-              <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
-                <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>支持直连</div>
-                <div className='text-base font-semibold text-green-600 dark:text-green-400'>
-                  ✅ {corsStats.directCount} 个
-                  <span className='text-sm ml-2 font-normal'>
-                    ({corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}%)
-                  </span>
-                </div>
-              </div>
-
-              <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
-                <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>需要代理</div>
-                <div className='text-base font-semibold text-orange-600 dark:text-orange-400'>
-                  ❌ {corsStats.proxyCount} 个
-                  <span className='text-sm ml-2 font-normal'>
-                    ({corsStats.totalChecked > 0 ? Math.round((corsStats.proxyCount / corsStats.totalChecked) * 100) : 0}%)
-                  </span>
-                </div>
-              </div>
-            </div>
-
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
             <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
-              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>总检测数 / 估算流量节省</div>
-              <div className='text-base font-semibold text-blue-600 dark:text-blue-400'>
-                📈 {corsStats.totalChecked} 个源
-                <span className='text-sm ml-3 text-green-600 dark:text-green-400 font-normal'>
-                  💾 节省约 {corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}% 带宽
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>支持直连</div>
+              <div className='text-base font-semibold text-green-600 dark:text-green-400'>
+                ✅ {corsStats.directCount} 个
+                <span className='text-sm ml-2 font-normal'>
+                  ({corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}%)
                 </span>
               </div>
             </div>
 
-            <div className='text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-blue-200 dark:border-blue-800'>
-              💡 提示: 直连模式通过客户端直接访问流媒体源来节省服务器带宽，但需要流媒体源支持跨域访问（CORS）。检测结果缓存有效期7天。
+            <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>需要代理</div>
+              <div className='text-base font-semibold text-orange-600 dark:text-orange-400'>
+                ❌ {corsStats.proxyCount} 个
+                <span className='text-sm ml-2 font-normal'>
+                  ({corsStats.totalChecked > 0 ? Math.round((corsStats.proxyCount / corsStats.totalChecked) * 100) : 0}%)
+                </span>
+              </div>
             </div>
+          </div>
+
+          <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
+            <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>总检测数 / 估算流量节省</div>
+            <div className='text-base font-semibold text-blue-600 dark:text-blue-400'>
+              📈 {corsStats.totalChecked} 个源
+              <span className='text-sm ml-3 text-green-600 dark:text-green-400 font-normal'>
+                💾 节省约 {corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}% 带宽
+              </span>
+            </div>
+          </div>
+
+          <div className='text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-blue-200 dark:border-blue-800'>
+            💡 提示: 直连模式通过客户端直接访问流媒体源来节省服务器带宽，但需要流媒体源支持跨域访问（CORS）。检测结果缓存有效期7天。
+          </div>
           </>
         ) : (
           <div className='text-center py-8'>
@@ -6546,7 +6556,7 @@ const LiveSourceConfig = ({
               <label className='block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1'>
                 自定义 UA（选填）
               </label>
-              <input
+            <input
                 type='text'
                 value={editingLiveSource.ua}
                 onChange={(e) =>
@@ -6692,7 +6702,7 @@ const NetDiskConfig = ({
 }) => {
   const { alertModal, showAlert, hideAlert } = useAlertModal();
   const { isLoading, withLoading } = useLoadingState();
-
+  
   const [netDiskSettings, setNetDiskSettings] = useState({
     enabled: true,
     pansouUrl: 'https://so.252035.xyz',
@@ -6755,7 +6765,7 @@ const NetDiskConfig = ({
   const handleCloudTypeChange = (type: string, enabled: boolean) => {
     setNetDiskSettings(prev => ({
       ...prev,
-      enabledCloudTypes: enabled
+      enabledCloudTypes: enabled 
         ? [...prev.enabledCloudTypes, type]
         : prev.enabledCloudTypes.filter(t => t !== type)
     }));
@@ -6780,9 +6790,9 @@ const NetDiskConfig = ({
               <path fillRule='evenodd' d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z' clipRule='evenodd' />
             </svg>
             <span>📡 集成开源项目 <strong>PanSou</strong> 提供网盘资源搜索功能</span>
-            <a
-              href='https://github.com/fish2018/pansou'
-              target='_blank'
+            <a 
+              href='https://github.com/fish2018/pansou' 
+              target='_blank' 
               rel='noopener noreferrer'
               className='text-blue-700 dark:text-blue-300 hover:underline font-medium'
             >
@@ -6790,7 +6800,7 @@ const NetDiskConfig = ({
             </a>
           </div>
         </div>
-
+        
         {/* 启用网盘搜索 */}
         <div className='space-y-4'>
           <div className='flex items-center space-x-3'>
@@ -6908,8 +6918,9 @@ const NetDiskConfig = ({
         <button
           onClick={handleSave}
           disabled={isLoading('saveNetDiskConfig')}
-          className={`px-4 py-2 ${isLoading('saveNetDiskConfig') ? buttonStyles.disabled : buttonStyles.success
-            } rounded-lg transition-colors`}
+          className={`px-4 py-2 ${
+            isLoading('saveNetDiskConfig') ? buttonStyles.disabled : buttonStyles.success
+          } rounded-lg transition-colors`}
         >
           {isLoading('saveNetDiskConfig') ? '保存中…' : '保存配置'}
         </button>
@@ -6929,374 +6940,15 @@ const NetDiskConfig = ({
   );
 };
 
-function AdminPageClient() {
-  const { alertModal, showAlert, hideAlert } = useAlertModal();
-  const { isLoading, withLoading } = useLoadingState();
-  const [config, setConfig] = useState<AdminConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [role, setRole] = useState<'owner' | 'admin' | null>(null);
-  const [showResetConfigModal, setShowResetConfigModal] = useState(false);
-  const [expandedTabs, setExpandedTabs] = useState<{ [key: string]: boolean }>({
-    userConfig: false,
-    videoSource: false,
-    sourceTest: false,
-    liveSource: false,
-    siteConfig: false,
-    categoryConfig: false,
-    netdiskConfig: false,
-    embyConfig: false,
-    aiRecommendConfig: false,
-    youtubeConfig: false,
-    shortDramaConfig: false,
-    downloadConfig: false,
-    customAdFilter: false,
-    watchRoomConfig: false,
-    tvboxSecurityConfig: false,
-    trustedNetworkConfig: false,
-    danmuApiConfig: false,
-    telegramAuthConfig: false,
-    oidcAuthConfig: false,
-    configFile: false,
-    cacheManager: false,
-    dataMigration: false,
-    performanceMonitor: false,
-  });
-
-  // 获取管理员配置
-  // showLoading 用于控制是否在请求期间显示整体加载骨架。
-  const fetchConfig = useCallback(async (showLoading = false) => {
-    try {
-      if (showLoading) {
-        setLoading(true);
-      }
-
-      const response = await fetch(`/api/admin/config`);
-
-      if (!response.ok) {
-        const data = (await response.json()) as any;
-        throw new Error(`获取配置失败: ${data.error}`);
-      }
-
-      const data = (await response.json()) as AdminConfigResult;
-      setConfig(data.Config);
-      setRole(data.Role);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : '获取配置失败';
-      showError(msg, showAlert);
-      setError(msg);
-    } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // 首次加载时显示骨架
-    fetchConfig(true);
-  }, [fetchConfig]);
-
-  // 切换标签展开状态
-  const toggleTab = (tabKey: string) => {
-    setExpandedTabs((prev) => ({
-      ...prev,
-      [tabKey]: !prev[tabKey],
-    }));
-  };
-
-  // 新增: 重置配置处理函数
-  const handleResetConfig = () => {
-    setShowResetConfigModal(true);
-  };
-
-  const handleConfirmResetConfig = async () => {
-    await withLoading('resetConfig', async () => {
-      try {
-        const response = await fetch(`/api/admin/reset`);
-        if (!response.ok) {
-          throw new Error(`重置失败: ${response.status}`);
-        }
-        showSuccess('重置成功，请刷新页面！', showAlert);
-        await fetchConfig();
-        setShowResetConfigModal(false);
-      } catch (err) {
-        showError(err instanceof Error ? err.message : '重置失败', showAlert);
-        throw err;
-      }
-    });
-  };
-
-  if (loading) {
-    return (
-      <PageLayout activePath='/admin'>
-        <div className='-mt-6 md:mt-0'>
-          <div className='max-w-[95%] mx-auto'>
-            <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100 mb-8'>
-              管理员设置
-            </h1>
-            <div className='space-y-6'>
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={index}
-                  className='relative h-24 bg-linear-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded-xl overflow-hidden'
-                >
-                  <div className='absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-linear-to-r from-transparent via-white/20 to-transparent'></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  if (error) {
-    // 错误已通过弹窗展示，此处直接返回空
-    return null;
-  }
-
-  return (
-    <>
-      <PageLayout activePath='/admin'>
-        <div className='-mt-6 md:mt-0'>
-          <div className='max-w-[95%] mx-auto pb-40 md:pb-safe-bottom'>
-            {/* 标题 + 重置配置按钮 */}
-            <div className='flex items-center gap-2 mb-8'>
-              <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
-                管理员设置
-              </h1>
-              {config && role === 'owner' && (
-                <button
-                  onClick={handleResetConfig}
-                  className={`px-3 py-1 text-xs rounded-md transition-colors ${buttonStyles.dangerSmall}`}
-                >
-                  重置配置
-                </button>
-              )}
-            </div>
-
-            {/* 所有配置标签容器 */}
-            <div className='space-y-6'>
-              {/* 配置文件标签 - 仅站长可见 */}
-              {role === 'owner' && (
-                <CollapsibleTab
-                  title='配置文件'
-                  icon={
-                    <FileText
-                      size={20}
-                      className='text-gray-600 dark:text-gray-400'
-                    />
-                  }
-                  isExpanded={expandedTabs.configFile}
-                  onToggle={() => toggleTab('configFile')}
-                >
-                  <ConfigFileComponent config={config} refreshConfig={fetchConfig} />
-                </CollapsibleTab>
-              )}
-
-              {/* 站点配置标签 */}
-              <CollapsibleTab
-                title='站点配置'
-                icon={
-                  <Settings
-                    size={20}
-                    className='text-gray-600 dark:text-gray-400'
-                  />
-                }
-                isExpanded={expandedTabs.siteConfig}
-                onToggle={() => toggleTab('siteConfig')}
-              >
-                <SiteConfigComponent config={config} refreshConfig={fetchConfig} />
-              </CollapsibleTab>
-
-              {/* 用户配置标签 */}
-              <CollapsibleTab
-                title='用户配置'
-                icon={
-                  <Users size={20} className='text-gray-600 dark:text-gray-400' />
-                }
-                isExpanded={expandedTabs.userConfig}
-                onToggle={() => toggleTab('userConfig')}
-              >
-                <UserConfig
-                  config={config}
-                  role={role}
-                  refreshConfig={fetchConfig}
-                />
-              </CollapsibleTab>
-
-              {/* 视频源配置标签 */}
-              <CollapsibleTab
-                title='视频源配置'
-                icon={
-                  <Video size={20} className='text-gray-600 dark:text-gray-400' />
-                }
-                isExpanded={expandedTabs.videoSource}
-                onToggle={() => toggleTab('videoSource')}
-              >
-                <VideoSourceConfig config={config} refreshConfig={fetchConfig} />
-              </CollapsibleTab>
-
-              {/* 源检测标签 */}
-              <CollapsibleTab
-                title='源检测'
-                icon={
-                  <TestTube size={20} className='text-gray-600 dark:text-gray-400' />
-                }
-                isExpanded={expandedTabs.sourceTest}
-                onToggle={() => toggleTab('sourceTest')}
-              >
-                <SourceTestModule />
-              </CollapsibleTab>
-
-              {/* 直播源配置标签 */}
-              <CollapsibleTab
-                title='直播源配置'
-                icon={
-                  <Tv size={20} className='text-gray-600 dark:text-gray-400' />
-                }
-                isExpanded={expandedTabs.liveSource}
-                onToggle={() => toggleTab('liveSource')}
-              >
-                <LiveSourceConfig config={config} refreshConfig={fetchConfig} />
-              </CollapsibleTab>
-
-              {/* 分类配置标签 */}
-              <CollapsibleTab
-                title='分类配置'
-                icon={
-                  <FolderOpen
-                    size={20}
-                    className='text-gray-600 dark:text-gray-400'
-                  />
-                }
-                isExpanded={expandedTabs.categoryConfig}
-                onToggle={() => toggleTab('categoryConfig')}
-              >
-                <CategoryConfig config={config} refreshConfig={fetchConfig} />
-              </CollapsibleTab>
-
-              {/* 网盘搜索配置标签 */}
-              <CollapsibleTab
-                title='网盘搜索配置'
-                icon={
-                  <Database
-                    size={20}
-                    className='text-gray-600 dark:text-gray-400'
-                  />
-                }
-                isExpanded={expandedTabs.netdiskConfig}
-                onToggle={() => toggleTab('netdiskConfig')}
-              >
-                <NetDiskConfig config={config} refreshConfig={fetchConfig} />
-              </CollapsibleTab>
-
-              {/* Emby媒体库配置标签 */}
-              <CollapsibleTab
-                title='Emby媒体库配置'
-                icon={
-                  <Video
-                    size={20}
-                    className='text-green-600 dark:text-green-400'
-                  />
-                }
-                isExpanded={expandedTabs.embyConfig}
-                onToggle={() => toggleTab('embyConfig')}
-              >
-                <EmbyConfigComponent config={config} refreshConfig={fetchConfig} />
-              </CollapsibleTab>
-
-              {/* AI推荐配置标签 */}
-              <CollapsibleTab
-                title='AI推荐配置'
-                icon={
-                  <Brain
-                    size={20}
-                    className='text-gray-600 dark:text-gray-400'
-                  />
-                }
-                isExpanded={expandedTabs.aiRecommendConfig}
-                onToggle={() => toggleTab('aiRecommendConfig')}
-              >
-                <AIRecommendConfig config={config} refreshConfig={fetchConfig} />
-              </CollapsibleTab>
-            </div>
-          </div>
-        </div>
-      </PageLayout>
-
-      {/* 重置配置确认弹窗 */}
-    {showResetConfigModal && createPortal(
-          <div className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4' onClick={() => setShowResetConfigModal(false)}>
-            <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full' onClick={(e) => e.stopPropagation()}>
-              <div className='p-6'>
-                <div className='flex items-center justify-between mb-6'>
-                  <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
-                    确认重置配置
-                  </h3>
-                  <button
-                    onClick={() => setShowResetConfigModal(false)}
-                    className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors'
-                  >
-                    <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className='mb-6'>
-                  <div className='bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4'>
-                    <div className='flex items-center space-x-2 mb-2'>
-                      <svg className='w-5 h-5 text-yellow-600 dark:text-yellow-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
-                      </svg>
-                      <span className='text-sm font-medium text-yellow-800 dark:text-yellow-300'>
-                        ⚠️ 危险操作警告
-                      </span>
-                    </div>
-                    <p className='text-sm text-yellow-700 dark:text-yellow-400'>
-                      此操作将重置用户封禁和管理员设置、自定义视频源，站点配置将重置为默认值，是否继续？
-                    </p>
-                  </div>
-                </div>
-
-                {/* 操作按钮 */}
-                <div className='flex justify-end space-x-3'>
-                  <button
-                    onClick={() => setShowResetConfigModal(false)}
-                    className={`px-6 py-2.5 text-sm font-medium ${buttonStyles.secondary}`}
-                  >
-                    取消
-                  </button>
-                  <button
-                    onClick={handleConfirmResetConfig}
-                    disabled={isLoading('resetConfig')}
-                    className={`px-6 py-2.5 text-sm font-medium ${buttonStyles.danger}`}
-                  >
-                    {isLoading('resetConfig') ? '重置中...' : '确认重置'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-    </>
-  );
-}
-
 function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | null; refreshConfig: () => Promise<void> }) {
   const { alertModal, showAlert, hideAlert } = useAlertModal();
   const { isLoading, withLoading } = useLoadingState();
 
-  // 源列表状态
   const [sources, setSources] = useState<any[]>([]);
   const [editingSource, setEditingSource] = useState<any | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set());
 
-  // 表单状态
   const [formData, setFormData] = useState({
     key: '',
     name: '',
@@ -7307,19 +6959,16 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     Password: '',
     UserId: '',
     isDefault: false,
-    // 高级选项
     removeEmbyPrefix: false,
     appendMediaSourceId: false,
     transcodeMp4: false,
     proxyPlay: false,
   });
 
-  // 从配置加载源列表
   useEffect(() => {
     if (config?.EmbyConfig?.Sources) {
       setSources(config.EmbyConfig.Sources);
     } else if (config?.EmbyConfig?.ServerURL) {
-      // 兼容旧格式
       setSources([{
         key: 'default',
         name: 'Emby',
@@ -7334,7 +6983,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     }
   }, [config]);
 
-  // 重置表单
   const resetForm = () => {
     setFormData({
       key: '',
@@ -7346,7 +6994,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
       Password: '',
       UserId: '',
       isDefault: false,
-      // 高级选项
       removeEmbyPrefix: false,
       appendMediaSourceId: false,
       transcodeMp4: false,
@@ -7356,28 +7003,23 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     setShowAddForm(false);
   };
 
-  // 开始编辑
   const handleEdit = (source: any) => {
     setFormData({ ...source });
     setEditingSource(source);
     setShowAddForm(false);
   };
 
-  // 开始添加
   const handleAdd = () => {
     resetForm();
     setShowAddForm(true);
   };
 
-  // 保存源（添加或更新）
   const handleSave = async () => {
-    // 验证必填字段
     if (!formData.key || !formData.name || !formData.ServerURL) {
       showError('请填写必填字段：标识符、名称、服务器地址', showAlert);
       return;
     }
 
-    // 验证key唯一性
     if (!editingSource && sources.some(s => s.key === formData.key)) {
       showError('标识符已存在，请使用其他标识符', showAlert);
       return;
@@ -7387,16 +7029,13 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
       try {
         let newSources;
         if (editingSource) {
-          // 更新现有源
           newSources = sources.map(s =>
             s.key === editingSource.key ? formData : s
           );
         } else {
-          // 添加新源
           newSources = [...sources, formData];
         }
 
-        // 保存到配置
         const response = await fetch('/api/admin/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -7421,7 +7060,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 删除源
   const handleDelete = async (source: any) => {
     if (sources.length === 1) {
       showError('至少需要保留一个Emby源', showAlert);
@@ -7459,7 +7097,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 切换启用状态
   const handleToggleEnabled = async (source: any) => {
     await withLoading('toggleEmbySource', async () => {
       try {
@@ -7490,7 +7127,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 测试连接
   const handleTest = async (source: any) => {
     await withLoading('testEmbySource', async () => {
       try {
@@ -7519,7 +7155,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 清除缓存
   const handleClearCache = async () => {
     await withLoading('clearEmbyCache', async () => {
       try {
@@ -7544,7 +7179,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 导出配置
   const handleExport = async () => {
     await withLoading('exportEmby', async () => {
       try {
@@ -7568,7 +7202,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 导入配置
   const handleImport = async () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -7604,7 +7237,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     input.click();
   };
 
-  // 批量启用
   const handleBatchEnable = async () => {
     if (selectedSources.size === 0) return;
     await withLoading('batchEnableEmby', async () => {
@@ -7627,7 +7259,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 批量禁用
   const handleBatchDisable = async () => {
     if (selectedSources.size === 0) return;
     await withLoading('batchDisableEmby', async () => {
@@ -7650,7 +7281,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
     });
   };
 
-  // 批量删除
   const handleBatchDelete = async () => {
     if (selectedSources.size === 0) return;
     showAlert({
@@ -7692,7 +7322,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
         onConfirm={alertModal.onConfirm}
       />
 
-      {/* 源列表 */}
       <div className='space-y-4'>
         <div className='flex items-center justify-between'>
           <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>
@@ -7836,7 +7465,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
         )}
       </div>
 
-      {/* 添加/编辑表单 */}
       {(showAddForm || editingSource) && (
         <div className='border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-800/50'>
           <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100 mb-4'>
@@ -7844,7 +7472,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
           </h3>
 
           <div className='space-y-4'>
-            {/* 标识符 */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 标识符 *
@@ -7862,7 +7489,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               </p>
             </div>
 
-            {/* 名称 */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 显示名称 *
@@ -7876,7 +7502,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               />
             </div>
 
-            {/* 服务器地址 */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 Emby 服务器地址 *
@@ -7890,7 +7515,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               />
             </div>
 
-            {/* API Key */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 API Key（推荐）
@@ -7907,7 +7531,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               </p>
             </div>
 
-            {/* 用户名 */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 用户名（可选）
@@ -7921,7 +7544,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               />
             </div>
 
-            {/* 密码 */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 密码（可选）
@@ -7935,7 +7557,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               />
             </div>
 
-            {/* 用户 ID */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 用户 ID（使用 API Key 时必填）
@@ -7952,7 +7573,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               </p>
             </div>
 
-            {/* 启用开关 */}
             <div className='flex items-center justify-between'>
               <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                 启用此源
@@ -7969,13 +7589,11 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               </button>
             </div>
 
-            {/* 高级选项 */}
             <div className='border-t border-gray-200 dark:border-gray-700 pt-4 mt-4'>
               <h4 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-3'>
                 高级选项
               </h4>
 
-              {/* 选项1: 播放链接移除/emby前缀 */}
               <div className='flex items-center justify-between mb-3'>
                 <div className='flex-1'>
                   <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
@@ -7997,7 +7615,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
                 </button>
               </div>
 
-              {/* 选项2: 拼接MediaSourceId参数 */}
               <div className='flex items-center justify-between mb-3'>
                 <div className='flex-1'>
                   <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
@@ -8019,7 +7636,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
                 </button>
               </div>
 
-              {/* 选项3: 转码mp4 */}
               <div className='flex items-center justify-between mb-3'>
                 <div className='flex-1'>
                   <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
@@ -8041,7 +7657,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
                 </button>
               </div>
 
-              {/* 视频播放代理开关 */}
               <div className='flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700'>
                 <div className='flex-1'>
                   <h4 className='text-sm font-medium text-gray-900 dark:text-white'>
@@ -8064,7 +7679,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
               </div>
             </div>
 
-            {/* 操作按钮 */}
             <div className='flex gap-3 pt-4'>
               <button
                 onClick={handleSave}
@@ -8084,7 +7698,6 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
         </div>
       )}
 
-      {/* 全局操作 */}
       <div className='flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700'>
         <button
           onClick={handleClearCache}
@@ -8112,7 +7725,654 @@ function EmbyConfigComponent({ config, refreshConfig }: { config: AdminConfig | 
   );
 };
 
+function AdminPageClient() {
+  const { alertModal, showAlert, hideAlert } = useAlertModal();
+  const { isLoading, withLoading } = useLoadingState();
+  const [config, setConfig] = useState<AdminConfig | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<'owner' | 'admin' | null>(null);
+  const [showResetConfigModal, setShowResetConfigModal] = useState(false);
+  const [expandedTabs, setExpandedTabs] = useState<{ [key: string]: boolean }>({
+    userConfig: false,
+    videoSource: false,
+    sourceTest: false,
+    liveSource: false,
+    siteConfig: false,
+    categoryConfig: false,
+    netdiskConfig: false,
+    embyConfig: false,
+    aiRecommendConfig: false,
+    youtubeConfig: false,
+    shortDramaConfig: false,
+    downloadConfig: false,
+    customAdFilter: false,
+    watchRoomConfig: false,
+    tvboxSecurityConfig: false,
+    trustedNetworkConfig: false,
+    danmuApiConfig: false,
+    telegramAuthConfig: false,
+    oidcAuthConfig: false,
+    configFile: false,
+    cacheManager: false,
+    dataMigration: false,
+    performanceMonitor: false,
+  });
 
+  // 获取管理员配置
+  // showLoading 用于控制是否在请求期间显示整体加载骨架。
+  const fetchConfig = useCallback(async (showLoading = false) => {
+    try {
+      if (showLoading) {
+        setLoading(true);
+      }
+
+      const response = await fetch(`/api/admin/config`);
+
+      if (!response.ok) {
+        const data = (await response.json()) as any;
+        throw new Error(`获取配置失败: ${data.error}`);
+      }
+
+      const data = (await response.json()) as AdminConfigResult;
+      setConfig(data.Config);
+      setRole(data.Role);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '获取配置失败';
+      showError(msg, showAlert);
+      setError(msg);
+    } finally {
+      if (showLoading) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // 首次加载时显示骨架
+    fetchConfig(true);
+  }, [fetchConfig]);
+
+  // 切换标签展开状态
+  const toggleTab = (tabKey: string) => {
+    setExpandedTabs((prev) => ({
+      ...prev,
+      [tabKey]: !prev[tabKey],
+    }));
+  };
+
+  // 新增: 重置配置处理函数
+  const handleResetConfig = () => {
+    setShowResetConfigModal(true);
+  };
+
+  const handleConfirmResetConfig = async () => {
+    await withLoading('resetConfig', async () => {
+      try {
+        const response = await fetch(`/api/admin/reset`);
+        if (!response.ok) {
+          throw new Error(`重置失败: ${response.status}`);
+        }
+        showSuccess('重置成功，请刷新页面！', showAlert);
+        await fetchConfig();
+        setShowResetConfigModal(false);
+      } catch (err) {
+        showError(err instanceof Error ? err.message : '重置失败', showAlert);
+        throw err;
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <PageLayout activePath='/admin'>
+        <div className='-mt-6 md:mt-0'>
+          <div className='max-w-[95%] mx-auto'>
+            <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100 mb-8'>
+              管理员设置
+            </h1>
+            <div className='space-y-6'>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className='relative h-24 bg-linear-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded-xl overflow-hidden'
+                >
+                  <div className='absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-linear-to-r from-transparent via-white/20 to-transparent'></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    // 错误已通过弹窗展示，此处直接返回空
+    return null;
+  }
+
+  return (
+    <PageLayout activePath='/admin'>
+      <div className='-mt-6 md:mt-0'>
+        <div className='max-w-[95%] mx-auto pb-40 md:pb-safe-bottom'>
+          {/* 标题 + 重置配置按钮 */}
+          <div className='flex items-center gap-2 mb-8'>
+            <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
+              管理员设置
+            </h1>
+            {config && role === 'owner' && (
+              <button
+                onClick={handleResetConfig}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${buttonStyles.dangerSmall}`}
+              >
+                重置配置
+              </button>
+            )}
+          </div>
+
+          {/* 所有配置标签容器 */}
+          <div className='space-y-6'>
+            {/* 配置文件标签 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='配置文件'
+                icon={
+                  <FileText
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.configFile}
+                onToggle={() => toggleTab('configFile')}
+              >
+                <ConfigFileComponent config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
+            )}
+
+            {/* 站点配置标签 */}
+            <CollapsibleTab
+              title='站点配置'
+              icon={
+                <Settings
+                  size={20}
+                  className='text-gray-600 dark:text-gray-400'
+                />
+              }
+              isExpanded={expandedTabs.siteConfig}
+              onToggle={() => toggleTab('siteConfig')}
+            >
+              <SiteConfigComponent config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 用户配置标签 */}
+            <CollapsibleTab
+              title='用户配置'
+              icon={
+                <Users size={20} className='text-gray-600 dark:text-gray-400' />
+              }
+              isExpanded={expandedTabs.userConfig}
+              onToggle={() => toggleTab('userConfig')}
+            >
+              <UserConfig
+                config={config}
+                role={role}
+                refreshConfig={fetchConfig}
+              />
+            </CollapsibleTab>
+
+            {/* 视频源配置标签 */}
+            <CollapsibleTab
+              title='视频源配置'
+              icon={
+                <Video size={20} className='text-gray-600 dark:text-gray-400' />
+              }
+              isExpanded={expandedTabs.videoSource}
+              onToggle={() => toggleTab('videoSource')}
+            >
+              <VideoSourceConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 源检测标签 */}
+            <CollapsibleTab
+              title='源检测'
+              icon={
+                <TestTube size={20} className='text-gray-600 dark:text-gray-400' />
+              }
+              isExpanded={expandedTabs.sourceTest}
+              onToggle={() => toggleTab('sourceTest')}
+            >
+              <SourceTestModule />
+            </CollapsibleTab>
+
+            {/* 直播源配置标签 */}
+            <CollapsibleTab
+              title='直播源配置'
+              icon={
+                <Tv size={20} className='text-gray-600 dark:text-gray-400' />
+              }
+              isExpanded={expandedTabs.liveSource}
+              onToggle={() => toggleTab('liveSource')}
+            >
+              <LiveSourceConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 分类配置标签 */}
+            <CollapsibleTab
+              title='分类配置'
+              icon={
+                <FolderOpen
+                  size={20}
+                  className='text-gray-600 dark:text-gray-400'
+                />
+              }
+              isExpanded={expandedTabs.categoryConfig}
+              onToggle={() => toggleTab('categoryConfig')}
+            >
+              <CategoryConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 网盘搜索配置标签 */}
+            <CollapsibleTab
+              title='网盘搜索配置'
+              icon={
+                <Database
+                  size={20}
+                  className='text-gray-600 dark:text-gray-400'
+                />
+              }
+              isExpanded={expandedTabs.netdiskConfig}
+              onToggle={() => toggleTab('netdiskConfig')}
+            >
+              <NetDiskConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* Emby媒体库配置标签 */}
+            <CollapsibleTab
+              title='Emby媒体库配置'
+              icon={
+                <Video
+                  size={20}
+                  className='text-green-600 dark:text-green-400'
+                />
+              }
+              isExpanded={expandedTabs.embyConfig}
+              onToggle={() => toggleTab('embyConfig')}
+            >
+              <EmbyConfigComponent config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* AI推荐配置标签 */}
+            <CollapsibleTab
+              title='AI推荐配置'
+              icon={
+                <Brain
+                  size={20}
+                  className='text-gray-600 dark:text-gray-400'
+                />
+              }
+              isExpanded={expandedTabs.aiRecommendConfig}
+              onToggle={() => toggleTab('aiRecommendConfig')}
+            >
+              <AIRecommendConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* YouTube配置标签 */}
+            <CollapsibleTab
+              title='YouTube配置'
+              icon={
+                <Video
+                  size={20}
+                  className='text-gray-600 dark:text-gray-400'
+                />
+              }
+              isExpanded={expandedTabs.youtubeConfig}
+              onToggle={() => toggleTab('youtubeConfig')}
+            >
+              <YouTubeConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 短剧API配置标签 */}
+            <CollapsibleTab
+              title='短剧API配置'
+              icon={
+                <Video
+                  size={20}
+                  className='text-purple-600 dark:text-purple-400'
+                />
+              }
+              isExpanded={expandedTabs.shortDramaConfig}
+              onToggle={() => toggleTab('shortDramaConfig')}
+            >
+              <ShortDramaConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 下载配置标签 */}
+            <CollapsibleTab
+              title='下载配置'
+              icon={
+                <Download
+                  size={20}
+                  className='text-green-600 dark:text-green-400'
+                />
+              }
+              isExpanded={expandedTabs.downloadConfig}
+              onToggle={() => toggleTab('downloadConfig')}
+            >
+              <DownloadConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 自定义去广告标签 */}
+            <CollapsibleTab
+              title='自定义去广告'
+              icon={
+                <Video
+                  size={20}
+                  className='text-purple-600 dark:text-purple-400'
+                />
+              }
+              isExpanded={expandedTabs.customAdFilter}
+              onToggle={() => toggleTab('customAdFilter')}
+            >
+              <CustomAdFilterConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 观影室配置标签 */}
+            <CollapsibleTab
+              title='观影室配置'
+              icon={
+                <Users
+                  size={20}
+                  className='text-indigo-600 dark:text-indigo-400'
+                />
+              }
+              isExpanded={expandedTabs.watchRoomConfig}
+              onToggle={() => toggleTab('watchRoomConfig')}
+            >
+              <WatchRoomConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* TVBox安全配置标签 */}
+            <CollapsibleTab
+              title='TVBox安全配置'
+              icon={
+                <Settings
+                  size={20}
+                  className='text-gray-600 dark:text-gray-400'
+                />
+              }
+              isExpanded={expandedTabs.tvboxSecurityConfig}
+              onToggle={() => toggleTab('tvboxSecurityConfig')}
+            >
+              <TVBoxSecurityConfig config={config} refreshConfig={fetchConfig} />
+            </CollapsibleTab>
+
+            {/* 信任网络配置 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='信任网络配置'
+                icon={
+                  <Shield
+                    size={20}
+                    className='text-green-600 dark:text-green-400'
+                  />
+                }
+                isExpanded={expandedTabs.trustedNetworkConfig}
+                onToggle={() => toggleTab('trustedNetworkConfig')}
+              >
+                <TrustedNetworkConfig config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
+            )}
+
+            {/* 弹幕API配置 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='弹幕API配置'
+                icon={
+                  <MessageSquare
+                    size={20}
+                    className='text-purple-600 dark:text-purple-400'
+                  />
+                }
+                isExpanded={expandedTabs.danmuApiConfig}
+                onToggle={() => toggleTab('danmuApiConfig')}
+              >
+                <DanmuApiConfig config={config} refreshConfig={fetchConfig} />
+              </CollapsibleTab>
+            )}
+
+            {/* Telegram 登录配置 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='Telegram 登录配置'
+                icon={
+                  <svg
+                    viewBox='0 0 24 24'
+                    width='20'
+                    height='20'
+                    className='text-blue-500 dark:text-blue-400'
+                    fill='currentColor'
+                  >
+                    <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.05-.49-.82-.27-1.47-.42-1.42-.88.03-.24.37-.48 1.02-.73 4-1.74 6.68-2.88 8.03-3.44 3.82-1.58 4.61-1.85 5.13-1.86.11 0 .37.03.54.17.14.11.18.26.2.37.02.08.03.29.01.45z' />
+                  </svg>
+                }
+                isExpanded={expandedTabs.telegramAuthConfig}
+                onToggle={() => toggleTab('telegramAuthConfig')}
+              >
+                <TelegramAuthConfig
+                  config={
+                    config?.TelegramAuthConfig || {
+                      enabled: false,
+                      botToken: '',
+                      botUsername: '',
+                      autoRegister: true,
+                      buttonSize: 'large',
+                      showAvatar: true,
+                      requestWriteAccess: false,
+                    }
+                  }
+                  onSave={async (newConfig) => {
+                    if (!config) return;
+                    await fetch('/api/admin/config', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        ...config,
+                        TelegramAuthConfig: newConfig,
+                      }),
+                    });
+                    await fetchConfig();
+                  }}
+                />
+              </CollapsibleTab>
+            )}
+
+            {/* OIDC 登录配置 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='OIDC 登录配置'
+                icon={
+                  <KeyRound
+                    size={20}
+                    className='text-purple-500 dark:text-purple-400'
+                  />
+                }
+                isExpanded={expandedTabs.oidcAuthConfig}
+                onToggle={() => toggleTab('oidcAuthConfig')}
+              >
+                <OIDCAuthConfig
+                  config={
+                    config?.OIDCAuthConfig || {
+                      enabled: false,
+                      enableRegistration: false,
+                      issuer: '',
+                      authorizationEndpoint: '',
+                      tokenEndpoint: '',
+                      userInfoEndpoint: '',
+                      clientId: '',
+                      clientSecret: '',
+                      buttonText: '',
+                      minTrustLevel: 0,
+                    }
+                  }
+                  providers={config?.OIDCProviders || []}
+                  onSave={async (newConfig) => {
+                    if (!config) return;
+                    await fetch('/api/admin/config', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        ...config,
+                        OIDCAuthConfig: newConfig,
+                      }),
+                    });
+                    await fetchConfig();
+                  }}
+                  onSaveProviders={async (newProviders) => {
+                    if (!config) return;
+                    const updatedConfig = {
+                      ...config,
+                      OIDCProviders: newProviders,
+                    };
+                    // 如果切换到多provider模式，删除旧的单provider配置
+                    if (newProviders.length > 0) {
+                      delete updatedConfig.OIDCAuthConfig;
+                    }
+                    await fetch('/api/admin/config', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(updatedConfig),
+                    });
+                    await fetchConfig();
+                  }}
+                />
+              </CollapsibleTab>
+            )}
+
+            {/* 缓存管理标签 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='缓存管理'
+                icon={
+                  <Database
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.cacheManager}
+                onToggle={() => toggleTab('cacheManager')}
+              >
+                <CacheManager />
+              </CollapsibleTab>
+            )}
+
+            {/* 数据迁移标签 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='数据迁移'
+                icon={
+                  <Database
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.dataMigration}
+                onToggle={() => toggleTab('dataMigration')}
+              >
+                <DataMigration onRefreshConfig={fetchConfig} />
+              </CollapsibleTab>
+            )}
+
+            {/* 性能监控标签 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='性能监控'
+                icon={
+                  <Activity
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.performanceMonitor}
+                onToggle={() => toggleTab('performanceMonitor')}
+              >
+                <PerformanceMonitor />
+              </CollapsibleTab>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 通用弹窗组件 */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={hideAlert}
+        type={alertModal.type}
+        title={alertModal.title}
+        message={alertModal.message}
+        timer={alertModal.timer}
+        showConfirm={alertModal.showConfirm}
+      />
+
+      {/* 重置配置确认弹窗 */}
+      {showResetConfigModal && createPortal(
+        <div className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4' onClick={() => setShowResetConfigModal(false)}>
+          <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full' onClick={(e) => e.stopPropagation()}>
+            <div className='p-6'>
+              <div className='flex items-center justify-between mb-6'>
+                <h3 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
+                  确认重置配置
+                </h3>
+                <button
+                  onClick={() => setShowResetConfigModal(false)}
+                  className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors'
+                >
+                  <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                  </svg>
+                </button>
+              </div>
+
+              <div className='mb-6'>
+                <div className='bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4'>
+                  <div className='flex items-center space-x-2 mb-2'>
+                    <svg className='w-5 h-5 text-yellow-600 dark:text-yellow-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                    </svg>
+                    <span className='text-sm font-medium text-yellow-800 dark:text-yellow-300'>
+                      ⚠️ 危险操作警告
+                    </span>
+                  </div>
+                  <p className='text-sm text-yellow-700 dark:text-yellow-400'>
+                    此操作将重置用户封禁和管理员设置、自定义视频源，站点配置将重置为默认值，是否继续？
+                  </p>
+                </div>
+              </div>
+
+              {/* 操作按钮 */}
+              <div className='flex justify-end space-x-3'>
+                <button
+                  onClick={() => setShowResetConfigModal(false)}
+                  className={`px-6 py-2.5 text-sm font-medium ${buttonStyles.secondary}`}
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleConfirmResetConfig}
+                  disabled={isLoading('resetConfig')}
+                  className={`px-6 py-2.5 text-sm font-medium ${isLoading('resetConfig') ? buttonStyles.disabled : buttonStyles.danger}`}
+                >
+                  {isLoading('resetConfig') ? '重置中...' : '确认重置'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </PageLayout>
+  );
+}
 
 export default function AdminPage() {
   return (
