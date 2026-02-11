@@ -94,17 +94,14 @@ export async function getTMDBMovieRecommendations(
 
 export async function getTMDBTVRecommendations(
   apiKey: string,
-  tvId: number,
-  proxy?: string,
-  reverseProxyBaseUrl?: string
+  tvId: number
 ): Promise<{ code: number; results: any[] }> {
   try {
     if (!apiKey || !tvId) {
       return { code: 400, results: [] };
     }
 
-    const baseUrl = reverseProxyBaseUrl || TMDB_BASE_URL;
-    const url = `${baseUrl}/tv/${tvId}/recommendations?api_key=${apiKey}&language=zh-CN&page=1`;
+    const url = `${TMDB_BASE_URL}/tv/${tvId}/recommendations?api_key=${apiKey}&language=zh-CN&page=1`;
 
     const response = await fetch(url, {
       headers: {
