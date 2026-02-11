@@ -41,9 +41,10 @@ export interface VideoCardProps {
   source_names?: string[];
   progress?: number;
   year?: string;
-  from: 'playrecord' | 'favorite' | 'search' | 'douban';
+  from: 'playrecord' | 'favorite' | 'search' | 'douban' | 'tmdb';
   currentEpisode?: number;
   douban_id?: number;
+  tmdb_id?: number;
   onDelete?: () => void;
   rate?: string;
   type?: string;
@@ -175,7 +176,7 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
   // 🎯 智能判断是否有底部标签（用于AI按钮位置调整）
   const hasBottomTags = useMemo(() => {
     return (remarks && (isSeriesCompleted(remarks) || hasReleaseTag)) ||
-           (isAggregate && dynamicSourceNames && dynamicSourceNames.length > 0);
+      (isAggregate && dynamicSourceNames && dynamicSourceNames.length > 0);
   }, [remarks, hasReleaseTag, isAggregate, dynamicSourceNames]);
 
   // 获取收藏状态（搜索结果页面不检查）
@@ -583,7 +584,7 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
         id: 'upcoming-notice',
         label: '该影片尚未上映，敬请期待',
         icon: <span className="text-lg">📅</span>,
-        onClick: () => {}, // 不执行任何操作
+        onClick: () => { }, // 不执行任何操作
         disabled: true,
         color: 'default' as const,
       });
@@ -787,9 +788,8 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
             alt={actualTitle}
             fill
             sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw"
-            className={`${origin === 'live' ? 'object-contain' : 'object-cover'} transition-all duration-500 ease-out ${
-              imageLoaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-md scale-105'
-            }`}
+            className={`${origin === 'live' ? 'object-contain' : 'object-cover'} transition-all duration-500 ease-out ${imageLoaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-md scale-105'
+              }`}
             referrerPolicy='no-referrer'
             loading={priority ? undefined : 'lazy'}
             priority={priority}
@@ -1004,11 +1004,10 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
           {/* 年份徽章 - Netflix 风格 - 左上角第二位 */}
           {config.showYear && actualYear && actualYear !== 'unknown' && actualYear.trim() !== '' && (
             <div
-              className={`absolute left-2 flex items-center bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-lg text-white/80 text-[10px] font-medium transition-all duration-300 ease-out group-hover:scale-105 z-30 ${
-                actualEpisodes && actualEpisodes > 1 && !isUpcoming && !(from === 'favorite' && actualEpisodes === 99)
-                  ? 'top-[38px]'  // 有集数徽章时向下偏移
-                  : 'top-2'
-              }`}
+              className={`absolute left-2 flex items-center bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-lg text-white/80 text-[10px] font-medium transition-all duration-300 ease-out group-hover:scale-105 z-30 ${actualEpisodes && actualEpisodes > 1 && !isUpcoming && !(from === 'favorite' && actualEpisodes === 99)
+                ? 'top-[38px]'  // 有集数徽章时向下偏移
+                : 'top-2'
+                }`}
               style={{
                 WebkitUserSelect: 'none',
                 userSelect: 'none',
@@ -1075,21 +1074,21 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
 
           {/* 评分徽章 - 动态颜色 - 🎯 使用容器查询替代媒体查询 */}
           {config.showRating && rate && ratingBadgeStyle && (
-              <div
-                className={`absolute top-2 right-2 ${ratingBadgeStyle.bgColor} ${ratingBadgeStyle.ringColor} ${ratingBadgeStyle.shadowColor} ${ratingBadgeStyle.textColor} ${ratingBadgeStyle.glowClass} text-xs font-bold rounded-full flex flex-col items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 backdrop-blur-sm w-9 h-9 @[180px]:w-10 @[180px]:h-10`}
-                style={{
-                  WebkitUserSelect: 'none',
-                  userSelect: 'none',
-                  WebkitTouchCallout: 'none',
-                } as React.CSSProperties}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  return false;
-                }}
-              >
-                <Star size={10} className="fill-current mb-0.5" />
-                <span className="text-[10px] @[180px]:text-xs font-extrabold leading-none">{rate}</span>
-              </div>
+            <div
+              className={`absolute top-2 right-2 ${ratingBadgeStyle.bgColor} ${ratingBadgeStyle.ringColor} ${ratingBadgeStyle.shadowColor} ${ratingBadgeStyle.textColor} ${ratingBadgeStyle.glowClass} text-xs font-bold rounded-full flex flex-col items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 backdrop-blur-sm w-9 h-9 @[180px]:w-10 @[180px]:h-10`}
+              style={{
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+                WebkitTouchCallout: 'none',
+              } as React.CSSProperties}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                return false;
+              }}
+            >
+              <Star size={10} className="fill-current mb-0.5" />
+              <span className="text-[10px] @[180px]:text-xs font-extrabold leading-none">{rate}</span>
+            </div>
           )}
 
           {/* 豆瓣链接 */}
