@@ -120,6 +120,7 @@ interface AlertModalProps {
   message?: string;
   timer?: number;
   showConfirm?: boolean;
+  onConfirm?: () => void;
 }
 
 const AlertModal = ({
@@ -129,7 +130,8 @@ const AlertModal = ({
   title,
   message,
   timer,
-  showConfirm = false
+  showConfirm = false,
+  onConfirm
 }: AlertModalProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -194,7 +196,12 @@ const AlertModal = ({
 
           {showConfirm && (
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (onConfirm) {
+                  onConfirm();
+                }
+                onClose();
+              }}
               className={`px-4 py-2 text-sm font-medium ${buttonStyles.primary}`}
             >
               确定
@@ -216,6 +223,7 @@ const useAlertModal = () => {
     message?: string;
     timer?: number;
     showConfirm?: boolean;
+    onConfirm?: () => void;
   }>({
     isOpen: false,
     type: 'success',
@@ -883,9 +891,8 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
               <div className='flex items-center'>
                 <button
                   type="button"
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                    config.UserConfig.AllowRegister ? buttonStyles.toggleOn : buttonStyles.toggleOff
-                  }`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${config.UserConfig.AllowRegister ? buttonStyles.toggleOn : buttonStyles.toggleOff
+                    }`}
                   role="switch"
                   aria-checked={config.UserConfig.AllowRegister}
                   onClick={async () => {
@@ -902,7 +909,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                             }
                           })
                         });
-                        
+
                         if (response.ok) {
                           await refreshConfig();
                           showAlert({
@@ -922,9 +929,8 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                 >
                   <span
                     aria-hidden="true"
-                    className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${
-                      config.UserConfig.AllowRegister ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
-                    }`}
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${config.UserConfig.AllowRegister ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
+                      }`}
                   />
                 </button>
                 <span className='ml-3 text-sm font-medium text-gray-900 dark:text-gray-100'>
@@ -947,9 +953,8 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                 <div className='flex items-center'>
                   <button
                     type="button"
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                      config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleOn : buttonStyles.toggleOff
-                    }`}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleOn : buttonStyles.toggleOff
+                      }`}
                     role="switch"
                     aria-checked={config.UserConfig.AutoCleanupInactiveUsers}
                     onClick={async () => {
@@ -990,9 +995,8 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                   >
                     <span
                       aria-hidden="true"
-                      className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${
-                        config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
-                      }`}
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full ${buttonStyles.toggleThumb} shadow transform ring-0 transition duration-200 ease-in-out ${config.UserConfig.AutoCleanupInactiveUsers ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
+                        }`}
                     />
                   </button>
                   <span className='ml-3 text-sm font-medium text-gray-900 dark:text-gray-100'>
@@ -3386,7 +3390,7 @@ const VideoSourceConfig = ({
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${source.is_adult
               ? 'bg-linear-to-r from-red-600 to-pink-600 focus:ring-red-500'
               : 'bg-gray-200 dark:bg-gray-700 focus:ring-gray-500'
-            } ${isLoading(`toggleAdult_${source.key}`) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } ${isLoading(`toggleAdult_${source.key}`) ? 'opacity-50 cursor-not-allowed' : ''}`}
             title={source.is_adult ? '点击取消成人资源标记' : '点击标记为成人资源'}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${source.is_adult ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -3829,22 +3833,20 @@ const VideoSourceConfig = ({
           <button
             onClick={handleCheckProxyStatus}
             disabled={!videoProxySettings.enabled || isLoading('checkProxyStatus')}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              !videoProxySettings.enabled || isLoading('checkProxyStatus')
-                ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500'
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!videoProxySettings.enabled || isLoading('checkProxyStatus')
+              ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500'
+              : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
           >
             {isLoading('checkProxyStatus') ? '检测中...' : '🔍 检测代理状态'}
           </button>
           <button
             onClick={handleSaveVideoProxy}
             disabled={isLoading('saveVideoProxy')}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              isLoading('saveVideoProxy')
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isLoading('saveVideoProxy')
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
           >
             {isLoading('saveVideoProxy') ? '保存中...' : '保存代理配置'}
           </button>
@@ -3852,11 +3854,10 @@ const VideoSourceConfig = ({
 
         {/* 代理状态显示 */}
         {proxyStatus && (
-          <div className={`mt-3 p-3 rounded-lg border ${
-            proxyStatus.healthy
-              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-          }`}>
+          <div className={`mt-3 p-3 rounded-lg border ${proxyStatus.healthy
+            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+            }`}>
             <div className='flex items-center gap-2'>
               {proxyStatus.healthy ? (
                 <svg className='w-5 h-5 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -3868,9 +3869,8 @@ const VideoSourceConfig = ({
                 </svg>
               )}
               <div className='flex-1'>
-                <div className={`text-sm font-semibold ${
-                  proxyStatus.healthy ? 'text-green-900 dark:text-green-300' : 'text-red-900 dark:text-red-300'
-                }`}>
+                <div className={`text-sm font-semibold ${proxyStatus.healthy ? 'text-green-900 dark:text-green-300' : 'text-red-900 dark:text-red-300'
+                  }`}>
                   {proxyStatus.healthy ? '✅ 代理正常工作' : '❌ 代理连接失败'}
                 </div>
                 <div className='text-xs text-gray-600 dark:text-gray-400 mt-1'>
@@ -3991,11 +3991,10 @@ const VideoSourceConfig = ({
             <button
               onClick={() => setShowValidationModal(true)}
               disabled={isValidating}
-              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 ${
-                isValidating
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-br from-purple-600 via-indigo-500 to-purple-500 hover:from-purple-700 hover:via-indigo-600 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 backdrop-blur-sm border border-white/10'
-              } transition-all duration-300`}
+              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 ${isValidating
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-br from-purple-600 via-indigo-500 to-purple-500 hover:from-purple-700 hover:via-indigo-600 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 backdrop-blur-sm border border-white/10'
+                } transition-all duration-300`}
             >
               {isValidating ? (
                 <>
@@ -4039,11 +4038,10 @@ const VideoSourceConfig = ({
             )}
             <button
               onClick={() => setShowAddForm(!showAddForm)}
-              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 transition-all duration-300 backdrop-blur-sm border border-white/10 ${
-                showAddForm
-                  ? 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-500 hover:from-gray-600 hover:via-gray-700 hover:to-gray-600 text-white shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-600/40'
-                  : 'bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 hover:from-emerald-700 hover:via-green-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-green-500/40'
-              } hover:-translate-y-0.5 active:scale-95`}
+              className={`group px-4 py-2 text-sm rounded-xl font-medium flex items-center space-x-2 transition-all duration-300 backdrop-blur-sm border border-white/10 ${showAddForm
+                ? 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-500 hover:from-gray-600 hover:via-gray-700 hover:to-gray-600 text-white shadow-lg shadow-gray-500/30 hover:shadow-xl hover:shadow-gray-600/40'
+                : 'bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 hover:from-emerald-700 hover:via-green-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-green-500/40'
+                } hover:-translate-y-0.5 active:scale-95`}
             >
               {showAddForm ? (
                 <>
@@ -5608,16 +5606,14 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                   enableAutoRefresh: !prev.enableAutoRefresh,
                 }))
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                cronSettings.enableAutoRefresh
-                  ? 'bg-green-600'
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${cronSettings.enableAutoRefresh
+                ? 'bg-green-600'
+                : 'bg-gray-300 dark:bg-gray-600'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
-                  cronSettings.enableAutoRefresh ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${cronSettings.enableAutoRefresh ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </label>
@@ -5661,16 +5657,14 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                   onlyRefreshRecent: !prev.onlyRefreshRecent,
                 }))
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                cronSettings.onlyRefreshRecent
-                  ? 'bg-green-600'
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${cronSettings.onlyRefreshRecent
+                ? 'bg-green-600'
+                : 'bg-gray-300 dark:bg-gray-600'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
-                  cronSettings.onlyRefreshRecent ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${cronSettings.onlyRefreshRecent ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </label>
@@ -5716,16 +5710,14 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                   onlyRefreshOngoing: !prev.onlyRefreshOngoing,
                 }))
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                cronSettings.onlyRefreshOngoing
-                  ? 'bg-green-600'
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${cronSettings.onlyRefreshOngoing
+                ? 'bg-green-600'
+                : 'bg-gray-300 dark:bg-gray-600'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
-                  cronSettings.onlyRefreshOngoing ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${cronSettings.onlyRefreshOngoing ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </label>
@@ -5938,16 +5930,14 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
                 EnableTMDBActorSearch: !prev.EnableTMDBActorSearch,
               }))
             }
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              siteSettings.EnableTMDBActorSearch
-                ? 'bg-green-600'
-                : 'bg-gray-200 dark:bg-gray-700'
-            }`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${siteSettings.EnableTMDBActorSearch
+              ? 'bg-green-600'
+              : 'bg-gray-200 dark:bg-gray-700'
+              }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                siteSettings.EnableTMDBActorSearch ? 'translate-x-6' : 'translate-x-1'
-              }`}
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${siteSettings.EnableTMDBActorSearch ? 'translate-x-6' : 'translate-x-1'
+                }`}
             />
           </button>
         </div>
@@ -6339,53 +6329,53 @@ const LiveSourceConfig = ({
       <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3'>
         {corsStats.totalChecked > 0 ? (
           <>
-          <div className='flex items-center justify-between'>
-            <h4 className='text-sm font-semibold text-blue-900 dark:text-blue-100'>
-              📊 直连模式统计
-            </h4>
-            <button
-              onClick={handleClearCorsCache}
-              className='text-xs px-3 py-1.5 bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-200 rounded-lg transition-colors font-medium'
-            >
-              清除缓存
-            </button>
-          </div>
+            <div className='flex items-center justify-between'>
+              <h4 className='text-sm font-semibold text-blue-900 dark:text-blue-100'>
+                📊 直连模式统计
+              </h4>
+              <button
+                onClick={handleClearCorsCache}
+                className='text-xs px-3 py-1.5 bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-200 rounded-lg transition-colors font-medium'
+              >
+                清除缓存
+              </button>
+            </div>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-            <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
-              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>支持直连</div>
-              <div className='text-base font-semibold text-green-600 dark:text-green-400'>
-                ✅ {corsStats.directCount} 个
-                <span className='text-sm ml-2 font-normal'>
-                  ({corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}%)
-                </span>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+              <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
+                <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>支持直连</div>
+                <div className='text-base font-semibold text-green-600 dark:text-green-400'>
+                  ✅ {corsStats.directCount} 个
+                  <span className='text-sm ml-2 font-normal'>
+                    ({corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}%)
+                  </span>
+                </div>
+              </div>
+
+              <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
+                <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>需要代理</div>
+                <div className='text-base font-semibold text-orange-600 dark:text-orange-400'>
+                  ❌ {corsStats.proxyCount} 个
+                  <span className='text-sm ml-2 font-normal'>
+                    ({corsStats.totalChecked > 0 ? Math.round((corsStats.proxyCount / corsStats.totalChecked) * 100) : 0}%)
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
-              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>需要代理</div>
-              <div className='text-base font-semibold text-orange-600 dark:text-orange-400'>
-                ❌ {corsStats.proxyCount} 个
-                <span className='text-sm ml-2 font-normal'>
-                  ({corsStats.totalChecked > 0 ? Math.round((corsStats.proxyCount / corsStats.totalChecked) * 100) : 0}%)
+              <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>总检测数 / 估算流量节省</div>
+              <div className='text-base font-semibold text-blue-600 dark:text-blue-400'>
+                📈 {corsStats.totalChecked} 个源
+                <span className='text-sm ml-3 text-green-600 dark:text-green-400 font-normal'>
+                  💾 节省约 {corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}% 带宽
                 </span>
               </div>
             </div>
-          </div>
 
-          <div className='bg-white dark:bg-gray-800 rounded-lg px-3 py-2.5 border border-gray-200 dark:border-gray-700'>
-            <div className='text-xs text-gray-500 dark:text-gray-400 mb-1'>总检测数 / 估算流量节省</div>
-            <div className='text-base font-semibold text-blue-600 dark:text-blue-400'>
-              📈 {corsStats.totalChecked} 个源
-              <span className='text-sm ml-3 text-green-600 dark:text-green-400 font-normal'>
-                💾 节省约 {corsStats.totalChecked > 0 ? Math.round((corsStats.directCount / corsStats.totalChecked) * 100) : 0}% 带宽
-              </span>
+            <div className='text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-blue-200 dark:border-blue-800'>
+              💡 提示: 直连模式通过客户端直接访问流媒体源来节省服务器带宽，但需要流媒体源支持跨域访问（CORS）。检测结果缓存有效期7天。
             </div>
-          </div>
-
-          <div className='text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-blue-200 dark:border-blue-800'>
-            💡 提示: 直连模式通过客户端直接访问流媒体源来节省服务器带宽，但需要流媒体源支持跨域访问（CORS）。检测结果缓存有效期7天。
-          </div>
           </>
         ) : (
           <div className='text-center py-8'>
@@ -6556,7 +6546,7 @@ const LiveSourceConfig = ({
               <label className='block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1'>
                 自定义 UA（选填）
               </label>
-            <input
+              <input
                 type='text'
                 value={editingLiveSource.ua}
                 onChange={(e) =>
@@ -6702,7 +6692,7 @@ const NetDiskConfig = ({
 }) => {
   const { alertModal, showAlert, hideAlert } = useAlertModal();
   const { isLoading, withLoading } = useLoadingState();
-  
+
   const [netDiskSettings, setNetDiskSettings] = useState({
     enabled: true,
     pansouUrl: 'https://so.252035.xyz',
@@ -6765,7 +6755,7 @@ const NetDiskConfig = ({
   const handleCloudTypeChange = (type: string, enabled: boolean) => {
     setNetDiskSettings(prev => ({
       ...prev,
-      enabledCloudTypes: enabled 
+      enabledCloudTypes: enabled
         ? [...prev.enabledCloudTypes, type]
         : prev.enabledCloudTypes.filter(t => t !== type)
     }));
@@ -6790,9 +6780,9 @@ const NetDiskConfig = ({
               <path fillRule='evenodd' d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z' clipRule='evenodd' />
             </svg>
             <span>📡 集成开源项目 <strong>PanSou</strong> 提供网盘资源搜索功能</span>
-            <a 
-              href='https://github.com/fish2018/pansou' 
-              target='_blank' 
+            <a
+              href='https://github.com/fish2018/pansou'
+              target='_blank'
               rel='noopener noreferrer'
               className='text-blue-700 dark:text-blue-300 hover:underline font-medium'
             >
@@ -6800,7 +6790,7 @@ const NetDiskConfig = ({
             </a>
           </div>
         </div>
-        
+
         {/* 启用网盘搜索 */}
         <div className='space-y-4'>
           <div className='flex items-center space-x-3'>
@@ -6918,9 +6908,8 @@ const NetDiskConfig = ({
         <button
           onClick={handleSave}
           disabled={isLoading('saveNetDiskConfig')}
-          className={`px-4 py-2 ${
-            isLoading('saveNetDiskConfig') ? buttonStyles.disabled : buttonStyles.success
-          } rounded-lg transition-colors`}
+          className={`px-4 py-2 ${isLoading('saveNetDiskConfig') ? buttonStyles.disabled : buttonStyles.success
+            } rounded-lg transition-colors`}
         >
           {isLoading('saveNetDiskConfig') ? '保存中…' : '保存配置'}
         </button>
