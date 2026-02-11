@@ -120,6 +120,7 @@ interface AlertModalProps {
   message?: string;
   timer?: number;
   showConfirm?: boolean;
+  onConfirm?: () => void;
 }
 
 const AlertModal = ({
@@ -129,7 +130,8 @@ const AlertModal = ({
   title,
   message,
   timer,
-  showConfirm = false
+  showConfirm = false,
+  onConfirm
 }: AlertModalProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -194,7 +196,12 @@ const AlertModal = ({
 
           {showConfirm && (
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (onConfirm) {
+                  onConfirm();
+                }
+                onClose();
+              }}
               className={`px-4 py-2 text-sm font-medium ${buttonStyles.primary}`}
             >
               确定
@@ -216,6 +223,7 @@ const useAlertModal = () => {
     message?: string;
     timer?: number;
     showConfirm?: boolean;
+    onConfirm?: () => void;
   }>({
     isOpen: false,
     type: 'success',
