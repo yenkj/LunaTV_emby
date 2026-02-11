@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
  */
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ token: string }> }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   const { searchParams } = new URL(request.url);
   const ac = searchParams.get('ac');
